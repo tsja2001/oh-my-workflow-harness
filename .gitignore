@@ -1,0 +1,19 @@
+# 公司代码仓库（各自有独立 git，不归本文档仓库管理）
+01zhaocai-end/
+02zhaocai-front/
+03zhaocai-start/
+
+# skill 有独立 git，自行版本管理
+skills/enterprise-dev-workflow/
+
+# 凭据（红线：永不提交）
+ai-docs/creds.env
+
+# 工具缓存
+scripts/.cache/
+*.class
+
+# 系统与编辑器杂物
+.DS_Store
+Thumbs.db
+.idea/

@@ -1,0 +1,85 @@
+1、先下载外部公共组件 npm install
+2、下载招采平台私有仓库组件
+
+/// 项目组私有仓库
+http://nexus.jdsn.com//repository/npm-jdsn-public/
+
+/// 淘宝 NPM 镜像
+http://registry.npm.taobao.org/
+
+/// 官方 NPM 镜像
+https://registry.npmjs.org/
+
+登录仓库
+npm login --registry=http://nexus.jdsn.com.cn/repository/npm-jdsn-public/
+
+账号:jdsn
+密码:Xvg3TvNTZqVkpg^d
+邮箱:scm@jdsn.com.cn
+
+下载组件:
+npm install XX --registry=http://nexus.jdsn.com/repository/npm-jdsn-public/
+例子: npm install @scm/scm-cache --registry=http://nexus.jdsn.com/repository/npm-jdsn-public/
+
+PS: 下载全局全部组件：
+npm install  -g scm-request@1.0.0-jdsn-beta scm-layout@1.0.2-jdsn-beta scm-layoutFullView@1.0.1-jdsn-beta scm-table@1.0.1-jdsn-beta scm-upload@1.0.0-jdsn-beta scm-searchList@1.0.1-jdsn-beta  scm-import@1.0.0-jdsn-beta scm-login@1.0.0-jdsn-beta --registry=http://nexus.jdsn.com.cn/repository/npm-jdsn-public/
+
+PS: 下载全部组件：
+npm install  scm-request@1.0.0-jdsn-beta scm-layout@1.0.2-jdsn-beta scm-layoutFullView@1.0.1-jdsn-beta scm-table@1.0.1-jdsn-beta scm-upload@1.0.1-jdsn-beta scm-searchList@1.0.0-jdsn-beta  scm-import@1.0.0-jdsn-beta scm-login@1.0.0-jdsn-beta --registry=http://nexus.jdsn.com.cn/repository/npm-jdsn-public/
+
+如果按照上面操作执行还提示依赖缺少的报错
+解决方案：在下载依赖命令后面带上 --legacy-peer-deps   安装时忽略所有peerDependencies，忽视依赖冲突，采用npm版本4到版本6的样式去安装依赖，已有的依赖不会覆盖
+
+组件下完后登录下列某一环境，获取接口的token，获取到的token放入 public/statics/config.js 的token字段，后启动项目即可
+http://10.0.54.16:32740/测试环境       商城端口号30370
+http://10.0.54.16:31369/开发环境
+http://10.0.54.16:31799/预发环境      商城端口号31768
+https://www.bbmgzc.com/生产环境
+
+商城测试账号： 20002976 10920012 10000090 12570013 10570022 20005238
+                        SSLLSX666&
+
+招采测试账号：admin  10190080 10387020 10350038 
+                       SSLLSX666&
+UAT的admin用户名改成zc_sys
+
+Jenkins开发环境账号密码: jdsn-dev/2gf*sEQ5CGYFENY8
+            测试环境账号密码: jdsn-test/ntge^mma#%S4#G3F
+            UAT环境账号密码: jdsn/9Fd76wW$EW%jby85
+            生产环境账号密码: jdsn/Xvg3TvNTZqVkpg^d
+
+K8S测试环境：
+地址: http://10.0.54.16:30880/login
+账号:  scm  
+密码:  Scm@123456  
+K8S生产环境：
+http://10.79.10.201:30880/login
+username: admin
+password:  u6VWrWa$^#kGGEK2  
+
+后台接口：/obs和/c  /obs不需要登录账号就能调用接口，/c需要登录
+
+发布组件时：
+npm login --registry=http://nexus.jdsn.com.cn/repository/npm-jdsn-beta/
+
+输入用户密码：
+jdsn
+Xvg3TvNTZqVkpg^d
+jdsn@pcitc.com
+
+上传组件：
+npm run build:like-ui
+
+npm publish --registry=http://nexus.jdsn.com.cn/repository/npm-jdsn-beta/
+
+招采移动端测试环境：
+http://10.0.54.16:31016
+10350038
+SSLLSX666&
+商城移动端测试环境：
+http://10.0.54.16:32217
+20005238  
+SSLLSX666&
+
+商城移动端uat：http://10.0.54.16:31253/#/login
+招采移动端uat：http://10.0.54.16:32652/#/login

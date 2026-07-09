@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(wsl -d ubuntu-24.04 -- bash -c \"ls /home/t/projects/work-wsl/01zhaocai-end/scm-source-all; echo '---'; ls /home/t/projects/work-wsl/01zhaocai-end/scm-ubm-all\")"
+    ]
+  }
+}
