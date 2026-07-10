@@ -1,0 +1,239 @@
+{
+  "info": {
+    "name": "集采日金额统计台账",
+    "description": "集采日金额统计台账全部接口，共8个。网关: http://10.0.54.16:32740/gateway\nToken过期时：登录test前端 → F12 → 任一请求 → 复制Authorization bearer后面整串，替换Collection变量token。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsic3BlYzQiXSwiZXhwIjoxNzgzNjc3NjM0LCJ1c2VyX25hbWUiOiJ7XCJsb2dpblR5cGVcIjpcIlBDXCIsXCJtZW1iZXJUeXBlXCI6XCIxMDNcIixcIm90aGVyc1wiOntcImxvZ2luVHlwZVwiOlwiUENcIixcImNsaWVudElwXCI6XCJzY21fdjNcIn0sXCJ0b2tlblwiOlwiMTA5MzAwMDI6YzMzYzU4ODAwOWI5NTU3MGJkYTE0MmNhMThkMzYzZDI6MDg4MWE0NzYtYWI5OC00YmMzLWFmN2MtNDc2YmQyOGEyYjUyXCIsXCJ1c2VySWRcIjpcIjEwOTMwMDAyXCIsXCJ1c2VyTG9naW5OYW1lXCI6XCIxMDkzMDAwMlwiLFwidXNlclJvbGVzXCI6W119IiwianRpIjoiNGRncjRFenZNcXliWTNhbm9lWUdCV0pfakNjIiwiY2xpZW50X2lkIjoic2NtX3YzIiwic2NvcGUiOlsiIl19.1x67Vh7ubTZ0FRYo7UxlvmfHc196U1KibAx5N-_XMNc",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "1. 查询分页列表",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json, text/plain, */*" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"model\": {},\n  \"pageNum\": 1,\n  \"pageSize\": 10\n}"
+        },
+        "url": {
+          "raw": "http://10.0.54.16:32740/gateway/e/business/source/collectionDailyAmountLedger/queryPageList",
+          "protocol": "http",
+          "host": ["10", "0", "54", "16"],
+          "port": "32740",
+          "path": ["gateway", "e", "business", "source", "collectionDailyAmountLedger", "queryPageList"]
+        },
+        "description": "分页查询台账列表。model里可选过滤字段：ledgerNo(流水号模糊)、executeUnitCode、purchaseCompanyCode、categoryCode、buCode、statisticDateArr(日期区间)"
+      }
+    },
+    {
+      "name": "1. 查询分页列表（带条件+导出）",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json, text/plain, */*" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"model\": {\n    \"executeUnitCode\": \"JDGS\",\n    \"categoryCode\": \"1501\",\n    \"statisticDateArr\": [\"2026-07-01\", \"2026-07-10\"]\n  },\n  \"pageNum\": 1,\n  \"pageSize\": 10\n}"
+        },
+        "url": {
+          "raw": "http://10.0.54.16:32740/gateway/e/business/source/collectionDailyAmountLedger/queryPageList",
+          "protocol": "http",
+          "host": ["10", "0", "54", "16"],
+          "port": "32740",
+          "path": ["gateway", "e", "business", "source", "collectionDailyAmountLedger", "queryPageList"]
+        },
+        "description": "带查询条件的示例。如需导出Excel，在前端发送时增加 exportRequest/exportTemplateCode/exportFileName 字段"
+      }
+    },
+    {
+      "name": "2. 新增台账",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json, text/plain, */*" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"executeUnitCode\": \"JDGS\",\n  \"executeUnitName\": \"机电公司\",\n  \"categoryCode\": \"1501\",\n  \"categoryName\": \"钢材\",\n  \"statisticDate\": \"2026-07-10\",\n  \"purchaseCompanyCode\": \"TSFGS\",\n  \"purchaseCompanyName\": \"唐山分公司\",\n  \"taxAmount\": 12800.50,\n  \"buCode\": \"SNJT\",\n  \"buName\": \"水泥集团\"\n}"
+        },
+        "url": {
+          "raw": "http://10.0.54.16:32740/gateway/e/business/source/collectionDailyAmountLedger/add",
+          "protocol": "http",
+          "host": ["10", "0", "54", "16"],
+          "port": "32740",
+          "path": ["gateway", "e", "business", "source", "collectionDailyAmountLedger", "add"]
+        },
+        "description": "新增台账（录入后直接发布）。返回生成的流水号。必填：executeUnitCode/Name, categoryCode/Name, statisticDate, purchaseCompanyCode/Name, taxAmount"
+      }
+    },
+    {
+      "name": "3. 修改台账",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json, text/plain, */*" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ledgerId\": \"2075106985478504449\",\n  \"executeUnitCode\": \"JDGS\",\n  \"executeUnitName\": \"机电公司\",\n  \"categoryCode\": \"1501\",\n  \"categoryName\": \"钢材\",\n  \"statisticDate\": \"2026-07-10\",\n  \"purchaseCompanyCode\": \"TSFGS\",\n  \"purchaseCompanyName\": \"唐山分公司\",\n  \"taxAmount\": 9999.99,\n  \"buCode\": \"SNJT\",\n  \"buName\": \"水泥集团\"\n}"
+        },
+        "url": {
+          "raw": "http://10.0.54.16:32740/gateway/e/business/source/collectionDailyAmountLedger/modify",
+          "protocol": "http",
+          "host": ["10", "0", "54", "16"],
+          "port": "32740",
+          "path": ["gateway", "e", "business", "source", "collectionDailyAmountLedger", "modify"]
+        },
+        "description": "修改台账。必须传 ledgerId，流水号/创建信息/删除标记会被后端置空后再update，防止覆盖。"
+      }
+    },
+    {
+      "name": "4. 删除台账",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json, text/plain, */*" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ledgerId\": \"2075106985478504449\"\n}"
+        },
+        "url": {
+          "raw": "http://10.0.54.16:32740/gateway/e/business/source/collectionDailyAmountLedger/delete",
+          "protocol": "http",
+          "host": ["10", "0", "54", "16"],
+          "port": "32740",
+          "path": ["gateway", "e", "business", "source", "collectionDailyAmountLedger", "delete"]
+        },
+        "description": "逻辑删除台账。只需传 ledgerId。"
+      }
+    },
+    {
+      "name": "5. 查看详情",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json, text/plain, */*" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ledgerId\": \"2075106985478504449\"\n}"
+        },
+        "url": {
+          "raw": "http://10.0.54.16:32740/gateway/e/business/source/collectionDailyAmountLedger/detail",
+          "protocol": "http",
+          "host": ["10", "0", "54", "16"],
+          "port": "32740",
+          "path": ["gateway", "e", "business", "source", "collectionDailyAmountLedger", "detail"]
+        },
+        "description": "查看台账详情。返回已逻辑删除的记录则为空对象。"
+      }
+    },
+    {
+      "name": "6. 查询组织（集采执行单位/采购企业）",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json, text/plain, */*" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"keyword\": \"机电\"\n}"
+        },
+        "url": {
+          "raw": "http://10.0.54.16:32740/gateway/e/business/source/collectionDailyAmountLedger/queryOrgForSelect",
+          "protocol": "http",
+          "host": ["10", "0", "54", "16"],
+          "port": "32740",
+          "path": ["gateway", "e", "business", "source", "collectionDailyAmountLedger", "queryOrgForSelect"]
+        },
+        "description": "按组织名称模糊查询。集采执行单位框和采购企业框共用此接口。传空 keyword 或 {} 则返回全部组织。返回：[{orgCode, orgName, belongBuCode, belongBuName}]"
+      }
+    },
+    {
+      "name": "6. 查询组织（全量）",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json, text/plain, */*" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "http://10.0.54.16:32740/gateway/e/business/source/collectionDailyAmountLedger/queryOrgForSelect",
+          "protocol": "http",
+          "host": ["10", "0", "54", "16"],
+          "port": "32740",
+          "path": ["gateway", "e", "business", "source", "collectionDailyAmountLedger", "queryOrgForSelect"]
+        },
+        "description": "不传 keyword，返回全部组织列表。"
+      }
+    },
+    {
+      "name": "7. 查询集采类目字典",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json, text/plain, */*" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "http://10.0.54.16:32740/gateway/e/business/source/collectionDailyAmountLedger/queryCategoryDict",
+          "protocol": "http",
+          "host": ["10", "0", "54", "16"],
+          "port": "32740",
+          "path": ["gateway", "e", "business", "source", "collectionDailyAmountLedger", "queryCategoryDict"]
+        },
+        "description": "查询集采类目下拉选项。返回：[{code, name}]，如 {code: '1501', name: '钢材'}"
+      }
+    },
+    {
+      "name": "8. 查询所属板块字典",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json, text/plain, */*" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        },
+        "url": {
+          "raw": "http://10.0.54.16:32740/gateway/e/business/source/collectionDailyAmountLedger/queryOwningplateDict",
+          "protocol": "http",
+          "host": ["10", "0", "54", "16"],
+          "port": "32740",
+          "path": ["gateway", "e", "business", "source", "collectionDailyAmountLedger", "queryOwningplateDict"]
+        },
+        "description": "查询所属板块下拉选项。返回：[{code, name}]，如 {code: 'BU004', name: '冀东集团'}"
+      }
+    }
+  ]
+}
