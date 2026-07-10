@@ -195,7 +195,8 @@ nacos.ip=10.0.54.19:8848
 
 - `scm-cloud-source` 导入了 `SourceWebConfig`、`ExportWebConfig`、`XxljobExecutorWebConfig`，因此 `scm-source-all` 内的 controller/service/mapper、通用导出、XXL Job 执行器都会装配进 `scm-source-web`。
 - 集采驾驶舱现有接口在 `01zhaocai-end/scm-source-all/scm-source-source/src/main/java/com/pcitc/scm/source/source/controller/SourceQueryController.java`：`GET /e/business/source/source/cockpit_collection_data_{typeCode}`。
-- 煤炭重点坑口块的现有前端在 `02zhaocai-front/scm-vue-all-cockpit/src/views/procurementCatalogMgt/index.vue`：固定请求上述接口的 `typeCode=kengk`，把 `dataDesc` 映射为坑口名、`dataValue` 映射为价格，单位前端固定为“元/吨”。后端虽已有 `KENGK` 枚举和 `queryKengk()` 占位方法，但截至 2026-07-10 仍走 `sc_collection_data` 的通用缓存查询；test 库有 5 条 `kengk` 旧数据，`collectionShow` 字典没有 `kengk` 开关项。
+- 煤炭重点坑口块的现有前端在 `02zhaocai-front/scm-vue-all-cockpit/src/views/procurementCatalogMgt/index.vue`：固定请求上述接口的 `typeCode=kengk`，把 `dataDesc` 映射为坑口名、`dataValue` 映射为价格，单位前端固定为“元/吨”。需求2开发前，后端虽已有 `KENGK` 枚举和 `queryKengk()` 占位方法，但仍走 `sc_collection_data` 的通用缓存查询；test 库有 5 条 `kengk` 旧数据，`collectionShow` 字典没有 `kengk` 开关项。
+- 2026-07-10 需求2开发后：`test` 提交 `fcfbfd9ff` 已新增 `sc_coal_pit_daily_indicator` 主表、`sc_coal_pit_daily_indicator_item` 明细表对应代码和 `/e/business/source/coalPitDailyIndicator/*` 管理接口；驾驶舱 `kengk` 在 `SourceCollectionDataServiceImpl` 中优先直接调用台账实时查询，不再读取 `sc_collection_data`，无有效台账时返回空列表。长期开发分支为 `feature/taizhang-yang`。
 - 当前驾驶舱读取有两种模式：`SourceCollectionDataServiceImpl` 会先查 UBM 字典 `collectionShow`，开关为 `1` 时实时 SQL 汇总 `sc_source_collection`，否则按 `data_type` 读取缓存表 `sc_collection_data`。
 - 现有集采数据刷新服务是 `SourceCollectionServiceImpl.gatherData(SourceCollectionGatherParam)`；不传 `finalDate` 时默认取昨天，并依次执行 `gatherSource`、`gatherSap`、`gatherOrder`、`gatherFpt` 写入 `sc_source_collection`。
 - XXL Job 执行器通用 handler 是 `simpleJobHandler`，它读取 XXL Job 参数并通过 AIM 调用带 `@TypeMapping` / `@MethodMapping` 的业务方法。`SourceCollectionService` 已标注 `@TypeMapping("sourceCollectionService")` 和 `@MethodMapping("gatherData")`。
