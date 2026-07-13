@@ -10,7 +10,7 @@
 - 管理接口前缀：`/e/business/source/coalPitDailyIndicator`
 - 驾驶舱既有地址保持不变，但不属于本版本台账联动验收范围。
 - 管理接口均为 `POST` + `application/json`；登录即可调用，菜单权限只影响页面入口。
-- `publishDate` 是价格归属/发布日期，格式 `yyyy-MM-dd`；新增不传时后端默认当天，修改时不可变更。
+- `publishDate` 是价格归属/发布日期，格式 `yyyy-MM-dd`；前端录入时默认当天并禁用日期控件，新增请求会传当天，修改时同样不可变更。
 - `publishTime`、`publishBy`、`publishByName` 全由后端填写，前端传入不会生效。
 - 坑口名称和价格必须成对；至少 1 组、最多 5 组；价格非负且最多两位小数。
 - 前端页面路由：`/businessManagementLedgerJC/coalPitDailyIndicator`；菜单配置必须使用这个路由。
@@ -20,7 +20,7 @@
 | 页面动作 | 调用接口 | 前端处理 |
 |---|---|---|
 | 首次进入/查询/翻页 | `queryPageList` | 传 `model.indicatorNo/executeUnitName/publishTimeArr`，横向展示坑口1～5 |
-| 打开录入 | 复用台账1的 `queryOrgForSelect` | 远程搜索执行单位，发布日期默认当天 |
+| 打开录入 | 复用台账1的 `queryOrgForSelect` | 远程搜索执行单位，发布日期默认当天且不可手动修改 |
 | 打开修改 | `detail` | 以详情结果回显完整 5 组字段；发布日期锁定不可修改 |
 | 确认发布 | `add` 或 `modify` | 先校验单位、日期、名称价格成对且至少一组，再提交完整坑口集合 |
 | 删除 | `delete` | 二次确认后删除，成功即刷新列表 |
