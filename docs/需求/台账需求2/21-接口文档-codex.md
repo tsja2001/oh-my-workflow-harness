@@ -1,7 +1,7 @@
 # 台账需求2 · 接口文档
 
-> 日期：2026-07-10 ｜ 工具：codex ｜ 状态：台账管理接口保留；驾驶舱实时接线撤回已合入并推送 `test`（merge `03a3117fe`），待 Jenkins 部署
-> 下一阶段：Jenkins 部署后，测试 AI 只验证台账管理接口；网关和 TOKEN 只从 `ai-docs/creds.env` 读取
+> 日期：2026-07-13 ｜ 工具：codex ｜ 状态：台账管理接口和前端调用均已实现；前端本地提交 `9eba1111` 尚未推送，驾驶舱实时接线仍已撤回
+> 下一阶段：推送并 Jenkins 部署前端后，刷新 TOKEN，按本文验证管理页面；网关和 TOKEN 只从 `ai-docs/creds.env` 读取
 
 > **范围变更：** `GET /e/business/source/source/cockpit_collection_data_kengk` 是既有接口，但本版本不再接入新台账，继续读取旧缓存；本文原驾驶舱联动用例取消，留到下一版本重新设计。
 
@@ -13,6 +13,18 @@
 - `publishDate` 是价格归属/发布日期，格式 `yyyy-MM-dd`；新增不传时后端默认当天，修改时不可变更。
 - `publishTime`、`publishBy`、`publishByName` 全由后端填写，前端传入不会生效。
 - 坑口名称和价格必须成对；至少 1 组、最多 5 组；价格非负且最多两位小数。
+- 前端页面路由：`/businessManagementLedgerJC/coalPitDailyIndicator`；菜单配置必须使用这个路由。
+
+## 前端调用对应关系
+
+| 页面动作 | 调用接口 | 前端处理 |
+|---|---|---|
+| 首次进入/查询/翻页 | `queryPageList` | 传 `model.indicatorNo/executeUnitName/publishTimeArr`，横向展示坑口1～5 |
+| 打开录入 | 复用台账1的 `queryOrgForSelect` | 远程搜索执行单位，发布日期默认当天 |
+| 打开修改 | `detail` | 以详情结果回显完整 5 组字段；发布日期锁定不可修改 |
+| 确认发布 | `add` 或 `modify` | 先校验单位、日期、名称价格成对且至少一组，再提交完整坑口集合 |
+| 删除 | `delete` | 二次确认后删除，成功即刷新列表 |
+| 导出 | `queryPageList` | 模板编码 `coal-pit-daily-export`，沿用当前查询条件 |
 
 ## 接口清单
 
@@ -81,6 +93,8 @@ bash scripts/api.sh POST /e/business/source/coalPitDailyIndicator/queryPageList 
 | 修改/删除已不存在或已删除记录 | `台账记录不存在或已删除` |
 
 ## 链路验收标准（测试 AI 逐条勾选）
+
+> 2026-07-13 开发收尾时只读调用第 1 个接口返回 `访问未授权`（`900301`），现有 TOKEN 已过期；以下仍需部署后重新执行。
 
 1. [ ] test 演示记录能分页查到，5 个坑口与原驾驶舱价格 `575/677/650/660/730` 一致。
 2. [ ] 新增返回 `JCKK-当天-NNN`，服务端写入发布时间和当前登录操作人。
