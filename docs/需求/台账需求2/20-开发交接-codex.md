@@ -1,6 +1,6 @@
 # 台账需求2 · 开发交接
 
-> 日期：2026-07-13 ｜ 工具：codex ｜ 状态：后端、test 数据库/导出配置和前端管理页面均已完成；后端导出日期修复 `e4abefc35` 及前端三个新提交均只在本地、尚未推送，驾驶舱联动仍已撤回
+> 日期：2026-07-13 ｜ 工具：codex ｜ 状态：后端、test 数据库/导出配置和前端管理页面均已完成；后端导出日期修复 `567fab397` 及前端三个新提交均只在本地、尚未推送，驾驶舱联动仍已撤回
 > 下一阶段：用户明确发起推送后再推前端分支并点 Jenkins；张雨配置菜单岗位后，测试 AI 按 `21-接口文档-codex.md` 验证管理页面全链路
 
 > **最新变更覆盖说明：** `feature/taizhang-yang` 提交 `d4eb7d21b` 精确撤回 `3992bf54e`，并通过 merge `03a3117fe` 进入远程 `test`；`2f33fa77f` 不动。以下原开发记录中关于驾驶舱实时读取新台账的描述已失效，仅作为历史留存。
@@ -35,7 +35,7 @@
 - 合入 test：`fcfbfd9ff Merge branch 'feature/taizhang-yang' into 'test'`（已推远端）
 - 撤回提交：`d4eb7d21b revert(source): 撤回驾驶舱坑口指标实时查询台账`（已推送 `feature/taizhang-yang`）
 - 撤回合入 test：`03a3117fe Merge branch 'feature/taizhang-yang' into 'test'`（已推送）
-- 导出日期修复：`e4abefc35 fix(source): 格式化坑口台账导出发布时间`（本地，**未推送**）
+- 导出日期修复：`567fab397 fix: 修复导出时间`（本地，**未推送**）
 - 本地撤回前备份：`backup/test-before-revert-3992-20260710`（**禁止推送**）
 - 合入前备份分支：`backup/taizhang-test-before-merge-20260710`
 - 代码回退：在 test 执行 `git revert -m 1 fcfbfd9ff` 后正常推送；不 force push。业务表可暂留，不影响旧代码。
