@@ -35,7 +35,7 @@
 | 3 | 详情 | `POST /e/business/source/coalPitDailyIndicator/detail` | `{"indicatorId":"<分页返回的主键>"}` | 返回该记录及坑口1~5 |
 | 4 | 修改并重新发布 | `POST /e/business/source/coalPitDailyIndicator/modify` | 见下方完整 JSON | 成功；流水号/发布日期/创建信息不变，发布时间和操作人刷新 |
 | 5 | 删除 | `POST /e/business/source/coalPitDailyIndicator/delete` | `{"indicatorId":"<主键>"}` | 成功；列表、详情和导出不再返回该记录 |
-| 6 | Excel 导出 | `POST /e/business/source/coalPitDailyIndicator/queryPageList` | 查询体额外带 `exportRequest` 等字段，见下方 | 导出 14 列，模板编码 `coal-pit-daily-export` |
+| 6 | Excel 导出 | `POST /e/business/source/coalPitDailyIndicator/queryPageList` | 查询体额外带 `exportRequest` 等字段，见下方 | 导出 14 列，模板编码 `coal-pit-daily-export`；发布时间格式 `yyyy-MM-dd HH:mm:ss` |
 
 ## 可直接运行的请求
 
@@ -79,7 +79,7 @@ bash scripts/api.sh POST /e/business/source/coalPitDailyIndicator/delete '{"indi
 bash scripts/api.sh POST /e/business/source/coalPitDailyIndicator/queryPageList '{"currentPage":1,"limit":100,"exportRequest":true,"exportTemplateCode":"coal-pit-daily-export","exportFileName":"煤炭重点坑口日指标台账","model":{}}'
 ```
 
-导出列：流水号、执行单位、坑口1~5名称与价格、发布时间、操作人。
+导出列：流水号、执行单位、坑口1~5名称与价格、发布时间、操作人。发布时间必须显示为如 `2026-07-13 16:35:20`，不能显示英文星期/月。
 
 ## 边界错误预期
 

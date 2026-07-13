@@ -1,6 +1,6 @@
 # 台账需求2 · 开发交接
 
-> 日期：2026-07-13 ｜ 工具：codex ｜ 状态：后端、test 数据库/导出配置和前端管理页面均已完成；前端主体 `9eba1111`、输入性能修复 `3b896244`、日期锁定 `ab2b9fe1` 均为本地提交且尚未推送，驾驶舱联动仍已撤回
+> 日期：2026-07-13 ｜ 工具：codex ｜ 状态：后端、test 数据库/导出配置和前端管理页面均已完成；后端导出日期修复 `e4abefc35` 及前端三个新提交均只在本地、尚未推送，驾驶舱联动仍已撤回
 > 下一阶段：用户明确发起推送后再推前端分支并点 Jenkins；张雨配置菜单岗位后，测试 AI 按 `21-接口文档-codex.md` 验证管理页面全链路
 
 > **最新变更覆盖说明：** `feature/taizhang-yang` 提交 `d4eb7d21b` 精确撤回 `3992bf54e`，并通过 merge `03a3117fe` 进入远程 `test`；`2f33fa77f` 不动。以下原开发记录中关于驾驶舱实时读取新台账的描述已失效，仅作为历史留存。
@@ -35,6 +35,7 @@
 - 合入 test：`fcfbfd9ff Merge branch 'feature/taizhang-yang' into 'test'`（已推远端）
 - 撤回提交：`d4eb7d21b revert(source): 撤回驾驶舱坑口指标实时查询台账`（已推送 `feature/taizhang-yang`）
 - 撤回合入 test：`03a3117fe Merge branch 'feature/taizhang-yang' into 'test'`（已推送）
+- 导出日期修复：`e4abefc35 fix(source): 格式化坑口台账导出发布时间`（本地，**未推送**）
 - 本地撤回前备份：`backup/test-before-revert-3992-20260710`（**禁止推送**）
 - 合入前备份分支：`backup/taizhang-test-before-merge-20260710`
 - 代码回退：在 test 执行 `git revert -m 1 fcfbfd9ff` 后正常推送；不 force push。业务表可暂留，不影响旧代码。
@@ -68,11 +69,14 @@ test 演示记录：流水号 `JCKK-20251208-001`，单位明确标成“水泥�
 - 开发中首次编译发现 prod API 模块没有 Fastjson 注解依赖，已删除多余 `JSONField` 用法，没有为了一个日期格式额外改 POM；修复后本需求文件零错误。
 - 前端在 `scm-vue-all-procurementscheme` 执行两次 `npm run build`，均 `exit 0`；只有仓库既有 CSS 顺序和包体积警告，没有本次页面编译错误。
 - 输入属性修复后再次执行 `npm run build`，`exit 0`；代码库已不存在本页面的 `:maxlength` 错误写法。
+- 后端日期修复在 `feature/taizhang-yang` 执行 `mvn -o -pl scm-source-source-api compile -DskipTests`，编译 102 个 API 源码并 `BUILD SUCCESS`。
+- 使用 Fastjson 1.2.83 对固定时间 DTO 做序列化实测，输出 `{"publishTime":"2026-07-13 16:35:20"}`；与最新 `origin/test` 做只读 `merge-tree` 模拟无冲突。
 - `npm run lint -- --no-fix` 无法执行：项目未安装 Vue CLI lint 插件，报 `command "lint" does not exist`，不是本次代码的 lint 报错。
 
 ## 5. 遗留与风险
 
 - 前端提交尚未推送、未 Jenkins 部署，因此本轮没有声称页面已在 test 跑通；部署后必须按接口文档独立测试。
+- 后端导出日期修复也尚未推送/部署；当前 test 环境重新导出仍会是旧行为，需进入 test 并部署 source 服务后复测。
 - 新管理页面已完成；菜单和岗位权限仍由张雨配置，后端不硬编码。菜单路由为 `/businessManagementLedgerJC/coalPitDailyIndicator`。
 - 2026-07-13 只读调用分页接口返回 `访问未授权`（`900301`），说明现有 TOKEN 已过期；运行态测试前需要用户从浏览器 F12 刷新。
 - 驾驶舱联动已延期到下一版本；当前本地撤回态继续走原有 `sc_collection_data` 缓存查询，不验证新台账联动。
