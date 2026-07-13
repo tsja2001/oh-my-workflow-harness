@@ -1,0 +1,342 @@
+{
+  "info": {
+    "name": "煤炭重点坑口日指标台账",
+    "description": "煤炭重点坑口日指标台账 管理接口，共6个。网关: http://10.0.54.16:32740/gateway\nToken过期：登录test前端 → F12 → 任一请求 → 复制Authorization bearer后面整串，替换Collection变量token。\n\n核心规则：\n· 坑口名称和价格必须成对，至少1组最多5组，价格≥0且最多2位小数\n· publishDate 为发布日期，新增不传默认当天，修改不可变更\n· publishTime/publishBy/publishByName 全由后端填写，前端传入无效",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsic3BlYzQiXSwiZXhwIjoxNzgzNjc3NjM0LCJ1c2VyX25hbWUiOiJ7XCJsb2dpblR5cGVcIjpcIlBDXCIsXCJtZW1iZXJUeXBlXCI6XCIxMDNcIixcIm90aGVyc1wiOntcImxvZ2luVHlwZVwiOlwiUENcIixcImNsaWVudElwXCI6XCJzY21fdjNcIn0sXCJ0b2tlblwiOlwiMTA5MzAwMDI6YzMzYzU4ODAwOWI5NTU3MGJkYTE0MmNhMThkMzYzZDI6MDg4MWE0NzYtYWI5OC00YmMzLWFmN2MtNDc2YmQyOGEyYjUyXCIsXCJ1c2VySWRcIjpcIjEwOTMwMDAyXCIsXCJ1c2VyTG9naW5OYW1lXCI6XCIxMDkzMDAwMlwiLFwidXNlclJvbGVzXCI6W119IiwianRpIjoiNGRncjRFenZNcXliWTNhbm9lWUdCV0pfakNjIiwiY2xpZW50X2lkIjoic2NtX3YzIiwic2NvcGUiOlsiIl19.1x67Vh7ubTZ0FRYo7UxlvmfHc196U1KibAx5N-_XMNc",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "查询",
+      "item": [
+        {
+          "name": "1. 分页查询（全量）",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPage\": 1,\n  \"limit\": 10,\n  \"model\": {}\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/queryPageList",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "queryPageList"]
+            },
+            "description": "无筛选条件，查全部。\n返回格式：{totalCount, currentPage, totalPage, start, limit, root: [...]}\nroot 中每条记录包含主表字段 + 坑口1~5平铺字段（pit1Name/pit1TaxPrice ~ pit5Name/pit5TaxPrice）。"
+          }
+        },
+        {
+          "name": "1. 分页查询（按流水号模糊）",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPage\": 1,\n  \"limit\": 10,\n  \"model\": {\n    \"indicatorNo\": \"JCKK-\"\n  }\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/queryPageList",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "queryPageList"]
+            },
+            "description": "按流水号模糊查询。流水号格式：JCKK-yyyyMMdd-NNN"
+          }
+        },
+        {
+          "name": "1. 分页查询（全套筛选条件）",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPage\": 1,\n  \"limit\": 10,\n  \"model\": {\n    \"indicatorNo\": \"JCKK-\",\n    \"executeUnitCode\": \"DEMO001\",\n    \"executeUnitName\": \"\",\n    \"publishTimeArr\": [\"2025-12-01 00:00:00\", \"2025-12-31 23:59:59\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/queryPageList",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "queryPageList"]
+            },
+            "description": "model 筛选条件字段说明：\n  indicatorNo: 流水号，模糊查询\n  executeUnitCode: 执行单位编码，精确匹配\n  executeUnitName: 执行单位名称，模糊查询\n  publishTimeArr: 发布时间区间 [开始, 结束]，格式 yyyy-MM-dd HH:mm:ss"
+          }
+        },
+        {
+          "name": "2. 查看详情",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"indicatorId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/detail",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "detail"]
+            },
+            "description": "查看详情。必须传 indicatorId（从分页查询结果获取）。\n返回完整记录及坑口1~5；已逻辑删除的记录返回空对象。"
+          }
+        },
+        {
+          "name": "6. Excel 导出",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPage\": 1,\n  \"limit\": 10000,\n  \"model\": {},\n  \"exportRequest\": true,\n  \"exportTemplateCode\": \"coal-pit-daily-export\",\n  \"exportFileName\": \"煤炭重点坑口日指标台账\"\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/queryPageList",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "queryPageList"]
+            },
+            "description": "导出 Excel（与分页查询同一接口，加 exportRequest 参数即可）。\nexportRequest: 布尔值 true（非字符串）\nexportTemplateCode: 模板编码 coal-pit-daily-export\nexportFileName: 下载文件名\n导出 14 列：流水号、执行单位、坑口1~5名称与价格、发布时间、操作人。\nmodel 筛选条件同样生效，支持按条件导出。后端自动将 limit 设为最大值。"
+          }
+        }
+      ]
+    },
+    {
+      "name": "新增/修改/删除",
+      "item": [
+        {
+          "name": "3. 新增并发布（完整5组坑口）",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"executeUnitId\": \"\",\n  \"executeUnitCode\": \"DEMO001\",\n  \"executeUnitName\": \"演示单位\",\n  \"publishDate\": \"2026-07-10\",\n  \"pit1Name\": \"金鸡滩5000大卡\",\n  \"pit1TaxPrice\": 540.00,\n  \"pit2Name\": \"金鸡滩5600大卡\",\n  \"pit2TaxPrice\": 530.00,\n  \"pit3Name\": \"转龙湾5500大卡\",\n  \"pit3TaxPrice\": 575.00,\n  \"pit4Name\": \"转龙湾5600大卡\",\n  \"pit4TaxPrice\": 677.00,\n  \"pit5Name\": \"转龙湾5800大卡\",\n  \"pit5TaxPrice\": 650.00\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/add",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "add"]
+            },
+            "description": "新增并发布。返回 data 为流水号，格式 JCKK-yyyyMMdd-NNN\n\n字段说明（业务字段全部必填，publishDate 可不传默认当天）：\n  executeUnitId: 执行单位ID\n  executeUnitCode: 执行单位编码\n  executeUnitName: 执行单位名称\n  publishDate: 发布日期 yyyy-MM-dd（不传默认当天）\n  pit1~5Name: 坑口1~5名称（至少1组）\n  pit1~5TaxPrice: 坑口1~5今日含税价格(元/吨)（与名称成对，≥0，最多2位小数）\n\n后端自动生成：indicatorId、indicatorNo、publishTime/By/Name、createBy/Name/Time\n前端传入无效：indicatorNo、publishTime、publishBy、deleteSign"
+          }
+        },
+        {
+          "name": "3. 新增并发布（最少1组坑口）",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"executeUnitCode\": \"DEMO001\",\n  \"executeUnitName\": \"演示单位\",\n  \"pit1Name\": \"金鸡滩5000大卡\",\n  \"pit1TaxPrice\": 540.00\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/add",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "add"]
+            },
+            "description": "最少填1组坑口即可发布，未填的坑口位置为 null。publishDate 未传则默认当天。"
+          }
+        },
+        {
+          "name": "4. 修改并重新发布",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"indicatorId\": \"\",\n  \"executeUnitCode\": \"DEMO001\",\n  \"executeUnitName\": \"演示单位\",\n  \"pit1Name\": \"金鸡滩5000大卡（修改）\",\n  \"pit1TaxPrice\": 541.25,\n  \"pit2Name\": \"金鸡滩5600大卡\",\n  \"pit2TaxPrice\": 531.00,\n  \"pit3Name\": \"转龙湾5500大卡\",\n  \"pit3TaxPrice\": 580.00,\n  \"pit4Name\": \"\",\n  \"pit4TaxPrice\": null,\n  \"pit5Name\": \"\",\n  \"pit5TaxPrice\": null\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/modify",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "modify"]
+            },
+            "description": "修改并重新发布。indicatorId 必填（从分页查询获取）。\n\n重要：坑口明细采用整批替换——必须把仍需保留的坑口全部传回，不想保留的传空字符串/null。\n不传的坑口默认 null。\n\n不可修改：流水号、发布日期、创建信息；修改后 publishTime/publishBy/publishByName 自动刷新。"
+          }
+        },
+        {
+          "name": "5. 删除",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"indicatorId\": \"\"\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/delete",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "delete"]
+            },
+            "description": "逻辑删除。只需传 indicatorId。删除后列表、详情、导出均不返回该记录。"
+          }
+        }
+      ]
+    },
+    {
+      "name": "错误边界测试",
+      "item": [
+        {
+          "name": "[错误] 执行单位为空",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"executeUnitCode\": \"\",\n  \"executeUnitName\": \"\",\n  \"pit1Name\": \"金鸡滩5000大卡\",\n  \"pit1TaxPrice\": 540.00\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/add",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "add"]
+            },
+            "description": "预期：返回 '集采执行单位不能为空'"
+          }
+        },
+        {
+          "name": "[错误] 坑口全空",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"executeUnitCode\": \"DEMO001\",\n  \"executeUnitName\": \"演示单位\"\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/add",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "add"]
+            },
+            "description": "预期：返回 '至少填写一组坑口名称和价格'"
+          }
+        },
+        {
+          "name": "[错误] 只有名称没有价格",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"executeUnitCode\": \"DEMO001\",\n  \"executeUnitName\": \"演示单位\",\n  \"pit1Name\": \"金鸡滩5000大卡\",\n  \"pit1TaxPrice\": null\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/add",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "add"]
+            },
+            "description": "预期：返回 '坑口1名称和价格必须同时填写'"
+          }
+        },
+        {
+          "name": "[错误] 价格负数",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"executeUnitCode\": \"DEMO001\",\n  \"executeUnitName\": \"演示单位\",\n  \"pit1Name\": \"金鸡滩5000大卡\",\n  \"pit1TaxPrice\": -1\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/add",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "add"]
+            },
+            "description": "预期：返回 '坑口1价格必须大于等于0且最多保留两位小数'"
+          }
+        },
+        {
+          "name": "[错误] 价格超过两位小数",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "application/json, text/plain, */*" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"executeUnitCode\": \"DEMO001\",\n  \"executeUnitName\": \"演示单位\",\n  \"pit1Name\": \"金鸡滩5000大卡\",\n  \"pit1TaxPrice\": 540.123\n}"
+            },
+            "url": {
+              "raw": "http://10.0.54.16:32740/gateway/e/business/source/coalPitDailyIndicator/add",
+              "protocol": "http",
+              "host": ["10", "0", "54", "16"],
+              "port": "32740",
+              "path": ["gateway", "e", "business", "source", "coalPitDailyIndicator", "add"]
+            },
+            "description": "预期：返回 '坑口1价格必须大于等于0且最多保留两位小数'"
+          }
+        }
+      ]
+    }
+  ]
+}

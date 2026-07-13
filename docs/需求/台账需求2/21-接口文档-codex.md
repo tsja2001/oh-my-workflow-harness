@@ -1,12 +1,14 @@
 # 台账需求2 · 接口文档
 
-> 日期：2026-07-10 ｜ 工具：codex ｜ 状态：接口代码已合入 test，待 Jenkins 部署后执行
-> 下一阶段：测试 AI 使用 `bash scripts/api.sh` 逐条执行；网关和 TOKEN 只从 `ai-docs/creds.env` 读取
+> 日期：2026-07-10 ｜ 工具：codex ｜ 状态：台账管理接口保留；驾驶舱实时接线撤回已合入并推送 `test`（merge `03a3117fe`），待 Jenkins 部署
+> 下一阶段：Jenkins 部署后，测试 AI 只验证台账管理接口；网关和 TOKEN 只从 `ai-docs/creds.env` 读取
+
+> **范围变更：** `GET /e/business/source/source/cockpit_collection_data_kengk` 是既有接口，但本版本不再接入新台账，继续读取旧缓存；本文原驾驶舱联动用例取消，留到下一版本重新设计。
 
 ## 基础规则
 
 - 管理接口前缀：`/e/business/source/coalPitDailyIndicator`
-- 驾驶舱保持原地址：`GET /e/business/source/source/cockpit_collection_data_kengk`
+- 驾驶舱既有地址保持不变，但不属于本版本台账联动验收范围。
 - 管理接口均为 `POST` + `application/json`；登录即可调用，菜单权限只影响页面入口。
 - `publishDate` 是价格归属/发布日期，格式 `yyyy-MM-dd`；新增不传时后端默认当天，修改时不可变更。
 - `publishTime`、`publishBy`、`publishByName` 全由后端填写，前端传入不会生效。
@@ -22,7 +24,6 @@
 | 4 | 修改并重新发布 | `POST /e/business/source/coalPitDailyIndicator/modify` | 见下方完整 JSON | 成功；流水号/发布日期/创建信息不变，发布时间和操作人刷新 |
 | 5 | 删除 | `POST /e/business/source/coalPitDailyIndicator/delete` | `{"indicatorId":"<主键>"}` | 成功；列表、详情和导出不再返回该记录 |
 | 6 | Excel 导出 | `POST /e/business/source/coalPitDailyIndicator/queryPageList` | 查询体额外带 `exportRequest` 等字段，见下方 | 导出 14 列，模板编码 `coal-pit-daily-export` |
-| 7 | 驾驶舱实时数据 | `GET /e/business/source/source/cockpit_collection_data_kengk` | 无请求体 | 最新发布日期、同日最新发布时间的一条台账，返回其有效坑口明细 |
 
 ## 可直接运行的请求
 
@@ -54,21 +55,13 @@ bash scripts/api.sh POST /e/business/source/coalPitDailyIndicator/modify '{"indi
 
 修改接口不接收发布日期变更；前端必须把仍需保留的坑口全部传回，因为明细采用整批替换。
 
-### 5. 驾驶舱
-
-```bash
-bash scripts/api.sh GET /e/business/source/source/cockpit_collection_data_kengk
-```
-
-响应每行继续使用原字段：`dataDesc=坑口名称`、`dataValue=价格`、`dataRank=顺序`。接口不会读取 `sc_collection_data`。
-
-### 6. 删除
+### 5. 删除
 
 ```bash
 bash scripts/api.sh POST /e/business/source/coalPitDailyIndicator/delete '{"indicatorId":"<主键>"}'
 ```
 
-### 7. 导出
+### 6. 导出
 
 ```bash
 bash scripts/api.sh POST /e/business/source/coalPitDailyIndicator/queryPageList '{"currentPage":1,"limit":100,"exportRequest":true,"exportTemplateCode":"coal-pit-daily-export","exportFileName":"煤炭重点坑口日指标台账","model":{}}'
@@ -94,8 +87,6 @@ bash scripts/api.sh POST /e/business/source/coalPitDailyIndicator/queryPageList 
 3. [ ] 流水号模糊、单位编码/名称、发布时间区间筛选正确。
 4. [ ] 详情完整回显；只填 1~3 组也能保存，未填位置为 null。
 5. [ ] 修改后流水号、发布日期、创建信息不变；业务字段、发布时间、操作人更新。
-6. [ ] 驾驶舱原 GET 地址立即显示最新发布日期的一条，字段协议不变。
-7. [ ] 删除最新记录后驾驶舱回退上一条有效台账；全部删光后返回空列表而非旧缓存。
-8. [ ] 删除后列表、详情、导出不可见，数据库主子记录 `delete_sign=1`。
-9. [ ] 导出成功且 14 列顺序、标题和 DTO 字段一致。
-10. [ ] 空参数、半组坑口、负数、三位小数、不存在主键均返回明确业务错误，不产生半条主子数据。
+6. [ ] 删除后列表、详情、导出不可见，数据库主子记录 `delete_sign=1`。
+7. [ ] 导出成功且 14 列顺序、标题和 DTO 字段一致。
+8. [ ] 空参数、半组坑口、负数、三位小数、不存在主键均返回明确业务错误，不产生半条主子数据。
