@@ -1,6 +1,6 @@
 # 台账需求2 · 开发交接
 
-> 日期：2026-07-13 ｜ 工具：codex ｜ 状态：后端、test 数据库/导出配置和前端管理页面均已完成；前端本地提交 `9eba1111` 尚未推送，驾驶舱联动仍已撤回
+> 日期：2026-07-13 ｜ 工具：codex ｜ 状态：后端、test 数据库/导出配置和前端管理页面均已完成；前端主体 `9eba1111`、输入性能修复 `3b896244` 均为本地提交且尚未推送，驾驶舱联动仍已撤回
 > 下一阶段：用户明确发起推送后再推前端分支并点 Jenkins；张雨配置菜单岗位后，测试 AI 按 `21-接口文档-codex.md` 验证管理页面全链路
 
 > **最新变更覆盖说明：** `feature/taizhang-yang` 提交 `d4eb7d21b` 精确撤回 `3992bf54e`，并通过 merge `03a3117fe` 进入远程 `test`；`2f33fa77f` 不动。以下原开发记录中关于驾驶舱实时读取新台账的描述已失效，仅作为历史留存。
@@ -44,6 +44,7 @@
 - 仓库：`02zhaocai-front/scm-vue-all-procurementscheme`
 - 当前分支：`prod-feature-jcmh-yangzhuoran`（用户已确认分支无问题）
 - 本地提交：`9eba1111 feat(台账): 新增煤炭重点坑口日指标管理页面`
+- 本地修复：`3b896244 fix(台账): 修正坑口名称输入框长度属性`
 - 远程状态：**未推送，未操作远程分支**
 - 回退方法：如尚未共享可在后续提交前调整；一旦共享，用 `git revert 9eba1111`，不改写公共历史。
 - 用户既有改动：`public/statics/config.js` 保持未提交，未进入 `9eba1111`。
@@ -65,6 +66,7 @@ test 演示记录：流水号 `JCKK-20251208-001`，单位明确标成“水泥�
 - 三级：用 Maven 真实依赖 classpath，`javac -source 8 -target 8` 隔离编译本需求全部新增文件、`SourceCollectionData` 和共享服务修改；feature 与 test 合并态各跑一次，退出码均为 0，test 合并态生成 15 个 `.class`。
 - 开发中首次编译发现 prod API 模块没有 Fastjson 注解依赖，已删除多余 `JSONField` 用法，没有为了一个日期格式额外改 POM；修复后本需求文件零错误。
 - 前端在 `scm-vue-all-procurementscheme` 执行两次 `npm run build`，均 `exit 0`；只有仓库既有 CSS 顺序和包体积警告，没有本次页面编译错误。
+- 输入属性修复后再次执行 `npm run build`，`exit 0`；代码库已不存在本页面的 `:maxlength` 错误写法。
 - `npm run lint -- --no-fix` 无法执行：项目未安装 Vue CLI lint 插件，报 `command "lint" does not exist`，不是本次代码的 lint 报错。
 
 ## 5. 遗留与风险
