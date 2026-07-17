@@ -204,6 +204,14 @@ nacos.ip=10.0.54.19:8848
 - UBM 数据字典代码在 `01zhaocai-end/scm-ubm-all/scm-ubm-basicdict`，核心表是 `ubm_dict_group`、`ubm_dict_type`、`ubm_dict`。常用查询接口是 `/c/business/ubm/dict/query`，请求体用 `cate` 传字典类型编码；页面维护接口包括 `/c/business/ubm/dictGroup/queryDictGroupTree`、`/c/business/ubm/dictType/save`、`/c/business/ubm/dict/save`。
 - 2026-07-09 查询 `scm_ubm_test`：`Owningplate`（所属板块）已存在于 `ubm_dict_type`，且 `ubm_dict` 下有 10 个启用选项 `BU001`~`BU010`；`collection_category`（集采类目）不存在，`1501/1701/2302/2502` 及“钢材/润滑剂/电线电缆/轴承及备件”在 `scm_ubm`、`scm_ubm_test`、`scm_ubm_uat` 字典值中均未命中。
 
+## 非平台录入（绿色通道）与 ES 同步链路（2026-07-17 cc 核实）
+
+- "非平台录入" = 绿色通道模块（代码名 greenChannel，接口后缀 Ftp/FPT）。主表 `scm_source_test.sc_supplier_green_channel`（一单一条），物料明细 `sc_supplier_channel_projects`（channel_id 关联）。代码在 `scm-source-all/scm-source-source` 的 SupplierGreenChannelController/ServiceImpl。
+- 审批状态 approve_status：0 审批中 / 101 通过 / 102 拒绝。审批回调 `SourceEnrollServiceImpl.greenChannelApprove`（≈1864 行）：通过时置 101 并发 MQ（businessType="FPT"）→ `scm-source-chase/mq/FptConsumerAdapater` → `FptMetaServiceImpl.pushFptMeta` 写 ES 索引 `index_web_fpt_meta_test`（单头粒度）。主表 es_code 标记同步状态（0=未同步）。
+- 字段易混：`bu_code/bu_name` = 板块（如 BU002 冀东水泥）；`bid_area_code/bid_area_name` = 区域（如 JHQY 吉黑区域）。字典 `purchase_business_type`：101 集团集采 / 102 二级集团集采 / 103 区域集采 / 104 分散采购。
+- 交易数据报表（liuchun 2026-06 提交）：`TradeDataReportServiceImpl`（scm-source-chase）汇总 ZC（招采中标 DealDetail+Source）与 OUT（绿色通道）两来源到 ES `index_web_trade_data_test`，XXL-JOB 经 `@MethodMapping("syncZcDealData"/"syncGreenChannelData")` 调度，手动触发 `/api/trade-data-report/sync*`。已知坑：增量按 create_time=昨天扫，审批周期跨天会漏单。
+- scm-source-all 另有旧 XXL 入口 `scm-source/xxljob/SourceXxlJobHandle`（@XxlJob("sourceJobHandler")，已 @Deprecated），参数格式"服务名-方法名-JSON"经 AIM 分发；与上文 `simpleJobHandler` 机制并存。
+
 ## 构建、部署和 CI
 
 - `03zhaocai-start/scm-cloud-starters-web` 和多数子模块都有 `Dockerfile`、`Jenkinsfile`。
