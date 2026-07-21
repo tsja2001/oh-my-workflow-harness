@@ -57,10 +57,11 @@
 | 现象 | 原因 / 处理 |
 |---|---|
 | 接口测试报 401/让我给 token | creds.env 的 TOKEN 过期了 → 浏览器 F12 复制 bearer 后面整串粘进去 |
+| 要查 ES（绿色通道/投标/集采/交易报表数据） | 直接 `bash scripts/esq.sh`（不带参列索引）；常用：`indices '*_test'`、`mapping <idx>`、`head <idx> 3`、`agg <idx> <field>`、`search <idx> '<DSL>'` |
 | AI 命令报错 `$变量` 是空的 | wsl 边界吞变量 → 提醒它"复杂命令先写 /tmp 脚本再执行"（AGENTS.md 里有） |
 | AI 说全量编译失败 | 正常！SNAPSHOT 漂移，同事也不编译 → 让它按 skill 的隔离 javac 验证自己的文件 |
 | 部署后功能没变化 | ① Jenkins 是不是真的重新构建了；② 是不是有开关/字典没配（比如驾驶舱 collectionShow） |
-| AI 开始瞎猜表名/字段 | 让它"先 dbq.sh 查了再说"，规矩是核实不猜 |
+| AI 开始瞎猜表名/字段 | 让它"先 dbq.sh / esq.sh 查了再说"，规矩是核实不猜 |
 
 ## 五、每天收工习惯（两分钟）
 

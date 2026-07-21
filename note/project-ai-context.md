@@ -204,13 +204,21 @@ nacos.ip=10.0.54.19:8848
 - UBM 数据字典代码在 `01zhaocai-end/scm-ubm-all/scm-ubm-basicdict`，核心表是 `ubm_dict_group`、`ubm_dict_type`、`ubm_dict`。常用查询接口是 `/c/business/ubm/dict/query`，请求体用 `cate` 传字典类型编码；页面维护接口包括 `/c/business/ubm/dictGroup/queryDictGroupTree`、`/c/business/ubm/dictType/save`、`/c/business/ubm/dict/save`。
 - 2026-07-09 查询 `scm_ubm_test`：`Owningplate`（所属板块）已存在于 `ubm_dict_type`，且 `ubm_dict` 下有 10 个启用选项 `BU001`~`BU010`；`collection_category`（集采类目）不存在，`1501/1701/2302/2502` 及“钢材/润滑剂/电线电缆/轴承及备件”在 `scm_ubm`、`scm_ubm_test`、`scm_ubm_uat` 字典值中均未命中。
 
-## 非平台录入（绿色通道）与 ES 同步链路（2026-07-17 cc 核实）
+## 非平台录入（绿色通道）与 ES 同步链路（2026-07-17 cc、2026-07-20 codex 核实）
 
 - "非平台录入" = 绿色通道模块（代码名 greenChannel，接口后缀 Ftp/FPT）。主表 `scm_source_test.sc_supplier_green_channel`（一单一条），物料明细 `sc_supplier_channel_projects`（channel_id 关联）。代码在 `scm-source-all/scm-source-source` 的 SupplierGreenChannelController/ServiceImpl。
 - 审批状态 approve_status：0 审批中 / 101 通过 / 102 拒绝。审批回调 `SourceEnrollServiceImpl.greenChannelApprove`（≈1864 行）：通过时置 101 并发 MQ（businessType="FPT"）→ `scm-source-chase/mq/FptConsumerAdapater` → `FptMetaServiceImpl.pushFptMeta` 写 ES 索引 `index_web_fpt_meta_test`（单头粒度）。主表 es_code 标记同步状态（0=未同步）。
 - 字段易混：`bu_code/bu_name` = 板块（如 BU002 冀东水泥）；`bid_area_code/bid_area_name` = 区域（如 JHQY 吉黑区域）。字典 `purchase_business_type`：101 集团集采 / 102 二级集团集采 / 103 区域集采 / 104 分散采购。
 - 交易数据报表（liuchun 2026-06 提交）：`TradeDataReportServiceImpl`（scm-source-chase）汇总 ZC（招采中标 DealDetail+Source）与 OUT（绿色通道）两来源到 ES `index_web_trade_data_test`，XXL-JOB 经 `@MethodMapping("syncZcDealData"/"syncGreenChannelData")` 调度，手动触发 `/api/trade-data-report/sync*`。已知坑：增量按 create_time=昨天扫，审批周期跨天会漏单。
+- 交易数据报表的 IN 写入者在 `scm-order-all` 的 `scm-order-report/InOrderReportServiceImpl`：SQL 从 `to_order` 取单头并用 `exists(to_order_product.is_internal=1)` 筛内部协同订单，补调组织接口取板块后写同一个索引；test 任务 236 每天 00:10 通过 `order-inOrderReportService-syncInOrderToEs-{}` 执行。source/order 各自有同字段 Model 和 Repository，并不共享 Java 文件。
+- 2026-07-20 codex 实查 test 调度库：交易数据任务 237（招采，每日 00:30）和 238（非平台，每日 02:40）均启用，handler 为公共 `simpleJobHandler`，参数分别是 `source-tradeDataReportService-syncZcDealData-{}`、`source-tradeDataReportService-syncGreenChannelData-{}`；近期日志连续返回 200。公共参数四段是“应用-`@TypeMapping`-`@MethodMapping`-JSON”，不是旧 `sourceJobHandler` 的三段格式。
+- 公共 `simpleJobHandler` 当前直接用 `-` 拆任务参数；`2026-07-20` 这类日期本身也含 `-`，所以不能安全把带日期的 JSON 放进任务参数。每日空参数 `{}` 可用，指定日期补跑优先走手动 HTTP 接口，或先改公共解析协议。
 - scm-source-all 另有旧 XXL 入口 `scm-source/xxljob/SourceXxlJobHandle`（@XxlJob("sourceJobHandler")，已 @Deprecated），参数格式"服务名-方法名-JSON"经 AIM 分发；与上文 `simpleJobHandler` 机制并存。
+- 绿色通道主表自身已有 `is_jc`（1 是/0 否）和 `purchase_business_type`；现有非平台详情页 `scm-vue-all-procurementscheme/src/views/supplier/detail/index.vue` 直接展示 `isJc`。采购方案的“是否集采”则来自 `sc_scheme.is_collection`：《供应商参与企业业务统计表》的 `/pageList_supplier` 返回 `schemeId`，前端据此调用 `getSchemeDetail` 并展示 `isCollection`。非平台记录没有 `scheme_id`，所以同一展示语义要按来源取字段：招采平台取 `sc_scheme.is_collection`，非平台取 `sc_supplier_green_channel.is_jc`。
+- 现有“交易数据”端到端分工跨 3 个仓库：`scm-source-all/scm-source-chase` 写 `index_web_trade_data_test`；`scm-report-all/scm-report-source` 的 `origin/prod` 负责 `/e/business/report/source/tradeDataPageList` 和导出；`scm-vue-all-productmgt/views/reportMgt/nbxtTransactionDataReport` 负责页面。后续同类报表不能只在 source 仓写查询接口。
+- 2026-07-20 codex 实查运行态：`index_web_trade_data_test` 有 39 条（IN 21 / OUT 9 / ZC 9）；test 的 `tradeDataSummary`、`tradeDataPageList` 均可正常调用。source、report、order 的 test Nacos 配置分别用不同配置键指向同一个索引。report 仓本地 `dev` 缺最新交易代码，跟读最终版本必须看 `origin/prod`。
+- 2026-07-21 codex 复查运行态：任务 236/237/238 当日均 trigger/handle 200；汇总接口返回全索引金额，但分页接口会额外按 `purchaseCompanyCode` 加登录人数据权限，所以同一账号可能出现“汇总有金额、列表 0 条”，不能据此误判 ES 无数据。
+- 绿色通道合作项目页面“物料描述”绑定 `productDesc`（表字段 `product_desc`），“含税总金额”绑定 `totalPrice`（表字段 `total_price`）；`product_name` 是另一列“物料名称”，不能仅凭中文相近混用。
 
 ## 构建、部署和 CI
 

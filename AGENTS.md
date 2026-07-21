@@ -8,6 +8,8 @@
 用户负责**人的接口**（拿 AI 准备好的问题和话术去问产品/领导/同事、点 Jenkins 构建、找人开权限、管理页面点配置）。
 对用户只说大白话；要用户去问人的，给逐字话术。完整工作流见 `skills/enterprise-dev-workflow/SKILL.md`。
 
+**无论是当前项目的git，还是子项目的git`（01zhaocai-end/**,02zhaocai-front/**,03zhaocai-start/**）`未经用户运行，绝对不可以提交到远程，绝对不可以操作远程分支。仅允许拉取代码和本地提交，**
+
 **Git 提交说明要像同事随手写的：只用 `feat: 简短表述` 或 `fix: 简短表述`，只写一行；禁止 `(模块)`、正文要点、完成清单和 `Co-Authored-By`，不要写得过度完整。**
 
 ## 目录地图
@@ -15,9 +17,9 @@
 | 位置 | 是什么 | 谁维护 |
 |---|---|---|
 | `AGENTS.md` / `CLAUDE.md` | AI 入口（本文件） | AI |
-| `skills/enterprise-dev-workflow/` | 完整工作流规范：八阶段 + 命令手册 + 文档模板 + 各阶段提示词（独立 git） | AI |
+| `skills/enterprise-dev-workflow/` | 完整工作流规范：需求到验证 + 代码复盘与理解交接 + 命令手册/模板/提示词（独立 git） | AI |
 | `ai-docs/` | AI 自维护公用知识：`工作规范与习惯.md`（活文档，必读）、`工作日志.md`（共享记忆：所有改动的流水账）、`creds.env`（凭据，**禁止提交**） | AI |
-| `scripts/` | 公用工具：`dbq.sh` 查库、`api.sh` 调 test 接口 | AI+用户 |
+| `scripts/` | 公用工具：`dbq.sh` 查库、`esq.sh` 查 ES、`api.sh` 调 test 接口 | AI+用户 |
 | `docs/需求/<需求名>/` | 每个需求一个文件夹：需求原件 + 各阶段交接文档（命名规范见下） | AI |
 | `docs/工作文档日常记录/` | 用户自己的笔记 + 同事发来的文档（AI 可读，未经用户同意不改） | 用户 |
 | `note/` | 代码库结构知识（`project-ai-context.md`、`backend-env-setup.md`），查代码结构问题先看这里 | AI（主要 codex） |
@@ -34,8 +36,9 @@
 ## 任务分级（先判断量级，再决定流程重量）
 
 - **查任务**（找代码/查数据/答疑，只查不改）：读够背景就干，**不写**交接文档和日志。
+- **复盘学习**（只读核实代码/数据，但要把理解交给用户）：按 skill Phase 9，默认不改代码/数据库，产出 `50-代码复盘与学习-<工具>.md`；不因写学习文档额外制造开发日志。
 - **小改**（改几行/几个文件）：不必走完整需求流程，但收工必须在 `ai-docs/工作日志.md` 顶部追加一条（≤4 行：日期 工具｜干了什么｜分支/提交｜坑），所属需求的主文档进度块同步更新。
-- **完整需求**：走 skill 全流程 + 全套交接文档 + 工作日志一条。
+- **完整需求**：走 skill Phase 1～8 + 全套开发/测试交接文档 + 工作日志一条；Phase 9 理解交接按需触发。
 
 ## 阶段交接文档命名规范（强制）
 
@@ -51,6 +54,7 @@
 | 21 | `21-接口文档-cc.md`（接口清单+请求示例） | 开发阶段 AI |
 | 30 | `30-测试报告-oc.md`（用例+结果+bug） | 测试阶段 AI |
 | 40 | `40-评审报告-oc.md`（review 发现+建议） | 评审阶段 AI |
+| 50 | `50-代码复盘与学习-codex.md`（全景+关键链路+跟读+掌握度验收） | 复盘学习 AI |
 | 90 | `90-临时-<主题>-cc.md`（规范外的临时文档一律走 90 段） | 任意 |
 
 规则：同阶段同工具重做 → **覆盖同名文件**；换工具重做 → 新文件（后缀换工具代号），并在文档开头声明"本文取代 xx 文件"。
@@ -69,7 +73,7 @@
 - **Windows 侧 AI**（桌面 app / Windows 终端）：执行命令一律 `wsl.exe -d ubuntu-24.04 -- bash /tmp/xx.sh`——
   凡是带变量、引号、循环的命令**先写成脚本文件再执行**，内联会被边界吞掉（`$VAR` 变空、引号丢失）。UNC 路径上禁止全树搜索（会超时）。
 - **WSL 终端里的 AI**：直接跑 bash，无以上限制。
-- 查库：`bash scripts/dbq.sh "SELECT ..." [库名]`。调 test 接口：`bash scripts/api.sh POST /e/business/... '{json}'`。
+- 查库：`bash scripts/dbq.sh "SELECT ..." [库名]`。查 ES：`bash scripts/esq.sh indices|mapping|count|head|one|search|agg|get|post ...`（详见脚本头注释）。调 test 接口：`bash scripts/api.sh POST /e/business/... '{json}'`。
 - 全量 mvn 编译是坏的（SNAPSHOT 漂移，同事也从不本地编译）；验证自己代码用隔离 javac，见 skill env-playbook 第 6 节。
 
 ## 活文档义务
