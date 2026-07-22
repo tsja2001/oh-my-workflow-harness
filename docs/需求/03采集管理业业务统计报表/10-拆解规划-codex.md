@@ -2,8 +2,8 @@
 
 > 日期：2026-07-20
 > 工具：codex
-> 当前状态：业务口径、公共 Model、test 实际索引名和跨仓库协作方式均已收敛；`scm-order-all` 与 `scm-source-all` 是两个独立 Git 仓库，不存在双方修改同一 Model 文件造成的 Git 冲突，FP 写入侧已具备开发条件。
-> 下一阶段：按 `90-临时-整体分阶段开发流程-codex.md` 进入阶段一；只实现并验证“手动把一小段 FP 数据写入 ES”的最小闭环，阶段一通过后才开发历史补数和定时任务。
+> 当前状态：FP 写入、历史补数和定时入口已进入 test；report 查询/导出与正确前端项目 `scm-vue-all-procurementscheme` 的页面已完成本地开发和验证，尚未推送、部署及配置菜单。
+> 下一阶段：用户推送 report/front 两个本地提交并点 Jenkins；配置 report 索引名和“我的工作台（企业端）-报表查询”菜单后，AI 继续做 test 查询、导出和页面联调验收。
 >
 > **本文取代 `10-拆解规划-cc.md` 和 `10-拆解规划-oc.md`，作为后续唯一主规划。**
 > 旧文档保留作分析过程，不再作为开发依据。
@@ -53,15 +53,18 @@
     - 第二阶段补齐批量能力并执行历史补数。
     - 第三阶段才配置每天自动同步。
     - ES 数据可信后，再依次做 report 查询导出、前端页面和菜单权限。
+22. ✅ report 查询和导出已完成本地提交：`scm-report-all` `feature/jicai-report-yang@9130a66`，读取统一 ES 索引，支持企业、供应商、板块、时间筛选和 15 列导出；读模型明确 `createIndex=false`。
+23. ✅ 前端已按同事要求迁移到 `scm-vue-all-procurementscheme`：固定路由 `/reportForms/centralizedProcurement` 放在通用动态路由 `/reportForms/:purchaseRepot` 前，页面本地提交为 `features/jicai-report-yang@c019cc0e`；错误项目 `scm-vue-all-productmgt` 已恢复干净。
+24. ✅ 前端 `npm run build` 通过；后端隔离编译成功生成本需求 class，全量 81 个源码只剩 1 个未改动驾驶舱类的既有依赖漂移错误。
+25. ✅ test 现状已核实：采集同步接口可正常调用，ES 有 5 条 FP 数据且筛选 DSL 验证通过；report 新查询/导出接口因尚未部署均为真实 404，需部署后完成运行时验收。
 
 **需要你做的：**
 
-- 当前无需继续找同事追问 Git 或索引名。准备开始开发时直接告诉 AI 即可；到部署阶段再由你点 Jenkins。
+- 推送并部署 `scm-report-all`、`scm-vue-all-procurementscheme` 的本地提交；按 `20-开发交接-codex.md` 配 report 索引名和菜单。完成后告诉 AI，继续跑页面、查询和 Excel 导出验收。
 
 **当前不能承诺的：**
 
-- 不能承诺整个页面由我们交付：目前只明确“第一期研究/接入非平台录入”，查询导出、前端页面和菜单由谁负责尚未书面分工。
-- 不能把一段 Java Model 当成“ES 已经建好”：当前运行态还没有这套 mapping，且没有同步接口路径和调用结果。
+- 不能把“本地构建通过”说成“test 页面已经可用”：report 和前端代码尚未部署，菜单尚未配置，当前新接口实测仍是 404。
 - 不能把 `centralizedProcurementBusinessManagementStatistics` 硬编码成索引名；真实物理索引必须以部署后的 Nacos/ES 为准。
 - 不能在当前 `feature/taizhang-yang` 上直接开发，也不能复用旧 `features/jicai`；二者都不是本需求的干净最新基线。
 
