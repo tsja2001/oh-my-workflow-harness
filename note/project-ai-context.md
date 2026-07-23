@@ -217,6 +217,7 @@ nacos.ip=10.0.54.19:8848
 - 绿色通道主表自身已有 `is_jc`（1 是/0 否）和 `purchase_business_type`；现有非平台详情页 `scm-vue-all-procurementscheme/src/views/supplier/detail/index.vue` 直接展示 `isJc`。采购方案的“是否集采”则来自 `sc_scheme.is_collection`：《供应商参与企业业务统计表》的 `/pageList_supplier` 返回 `schemeId`，前端据此调用 `getSchemeDetail` 并展示 `isCollection`。非平台记录没有 `scheme_id`，所以同一展示语义要按来源取字段：招采平台取 `sc_scheme.is_collection`，非平台取 `sc_supplier_green_channel.is_jc`。
 - 现有“交易数据”端到端分工跨 3 个仓库：`scm-source-all/scm-source-chase` 写 `index_web_trade_data_test`；`scm-report-all/scm-report-source` 的 `origin/prod` 负责 `/e/business/report/source/tradeDataPageList` 和导出；`scm-vue-all-productmgt/views/reportMgt/nbxtTransactionDataReport` 负责页面。后续同类报表不能只在 source 仓写查询接口。
 - “集采管理业务统计报表”前端归属与旧交易数据报表不同：同事确认放在 `scm-vue-all-procurementscheme` 的“我的工作台（企业端）-报表查询”，菜单 URL 为 `/procurementScheme/index.html#/reportForms/centralizedProcurement`。该项目已有 `/reportForms/:purchaseRepot` 通用动态路由，独立页面的固定路由必须排在它前面；菜单配置只负责导航，不会替代前端路由。
+- 2026-07-23 云采 YC 写入代码已由 `scm-order-all` 提交 `1f6fd0093` 到远端 `prod-chun0518` 并合入 `origin/test@bdcf979e9`，模块为 `scm-order-report/CentralizedProcurementReport*`。当前实现从组织接口直接取 `belongBuName/belongBuCode` 写 ES，导致 `BU002` 保存成“冀东水泥”，而 `Owningplate` 字典标准名是“水泥集团”；筛选仍按 `buCode` 可命中，但列表/下拉名称不一致，写入侧应按编码转字典标准名后补跑覆盖。
 - 2026-07-20 codex 实查运行态：`index_web_trade_data_test` 有 39 条（IN 21 / OUT 9 / ZC 9）；test 的 `tradeDataSummary`、`tradeDataPageList` 均可正常调用。source、report、order 的 test Nacos 配置分别用不同配置键指向同一个索引。report 仓本地 `dev` 缺最新交易代码，跟读最终版本必须看 `origin/prod`。
 - 2026-07-21 codex 复查运行态：任务 236/237/238 当日均 trigger/handle 200；汇总接口返回全索引金额，但分页接口会额外按 `purchaseCompanyCode` 加登录人数据权限，所以同一账号可能出现“汇总有金额、列表 0 条”，不能据此误判 ES 无数据。
 - 绿色通道合作项目页面“物料描述”绑定 `productDesc`（表字段 `product_desc`），“含税总金额”绑定 `totalPrice`（表字段 `total_price`）；`product_name` 是另一列“物料名称”，不能仅凭中文相近混用。
@@ -227,6 +228,7 @@ nacos.ip=10.0.54.19:8848
 - Dockerfile 逻辑：把 Maven 产物 `target/${JAR_FILE}` 加入镜像，入口使用 `java -javaagent:/usr/local/skywalking-agent/skywalking-agent.jar -jar -server -Dspring.profiles.active=${APP_PROFILE}`。
 - Jenkinsfile 逻辑：拉代码、进入 `PROJECT_DIR`、执行 `mvn versions:set ... && mvn clean install -U -DskipTests=true`、构建镜像、推送 Harbor、用 kubectl 部署。
 - Jenkinsfile 里可能含历史凭据或环境信息。后续 AI 不要复述密码；只说明需要 Jenkins 凭据/Harbor/KubeConfig。
+- 2026-07-23 codex 核实：采购方案前端 test 运行在 `si-scm-product-test` 命名空间的 `Deployment/scm-statics-web`，Pod/容器名以 `scm-statics-web` 为前缀，镜像为 `dockerhub.kubekey.local/si-scm-product-test/scm-statics-web:SNAPSHOT-<构建时间>`。`03zhaocai-start/scm-cloud-starter-vue/scm-cloud-statics` 的 test Jenkinsfile、Dockerfile 和 Deployment 模板与该运行态完全对应：Nginx 把前端静态包放在 `/home/apps/public/procurementScheme`，Jenkins 生成新时间戳镜像并 `kubectl apply` Deployment。部署应点对应 Jenkins 任务并观察 Deployment 滚动出新 Pod，不能直接编辑临时 Pod YAML；当前 Jenkins 任务名只存在于 Jenkins 配置，代码仓未记录。
 
 ## 推荐给后续 AI 的工作流
 

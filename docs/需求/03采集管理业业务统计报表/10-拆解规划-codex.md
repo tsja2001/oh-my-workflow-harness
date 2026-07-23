@@ -2,8 +2,8 @@
 
 > 日期：2026-07-20
 > 工具：codex
-> 当前状态：FP 写入、历史补数和定时入口已进入 test；report 查询/导出与正确前端项目 `scm-vue-all-procurementscheme` 的页面已完成本地开发和验证，尚未推送、部署及配置菜单。
-> 下一阶段：用户推送 report/front 两个本地提交并点 Jenkins；配置 report 索引名和“我的工作台（企业端）-报表查询”菜单后，AI 继续做 test 查询、导出和页面联调验收。
+> 当前状态：ES 写入、report 查询/导出和前端基础链路已跑通；“数据来源”后端筛选已在 test 实测通过，前端五项下拉已完成本地开发、构建和提交，尚未推送部署。
+> 下一阶段：先清理前端分支历史里的既有 token 配置提交，再由用户发起远程推送、合入 test 和 Jenkins 部署；部署后补做页面下拉、重置和按来源导出验收。
 >
 > **本文取代 `10-拆解规划-cc.md` 和 `10-拆解规划-oc.md`，作为后续唯一主规划。**
 > 旧文档保留作分析过程，不再作为开发依据。
@@ -57,16 +57,22 @@
 23. ✅ 前端已按同事要求迁移到 `scm-vue-all-procurementscheme`：固定路由 `/reportForms/centralizedProcurement` 放在通用动态路由 `/reportForms/:purchaseRepot` 前，页面本地提交为 `features/jicai-report-yang@c019cc0e`；错误项目 `scm-vue-all-productmgt` 已恢复干净。
 24. ✅ 前端 `npm run build` 通过；后端隔离编译成功生成本需求 class，全量 81 个源码只剩 1 个未改动驾驶舱类的既有依赖漂移错误。
 25. ✅ test 现状已核实：采集同步接口可正常调用，ES 有 5 条 FP 数据且筛选 DSL 验证通过；report 新查询/导出接口因尚未部署均为真实 404，需部署后完成运行时验收。
+26. ✅ 2026-07-23 新增“数据来源”查询条件：
+    - report 后端原有 `dataSource` 精确筛选和导出复用逻辑，无需修改 Java。
+    - 前端在 `centralizedProcurementReport/index.vue` 增加 ZC/FP/YC/MT/JD 五项下拉，未选择或清空时不传该字段，表示查询全部。
+    - `npm run build` 通过；test 接口实测全部 7 条、ZC 2 条、FP 5 条、YC/MT/JD 当前各 0 条。
+    - 前端本地提交 `features/jicai-report-yang@3f4b85de`，未推送；当前分支更早的 `3cc5230c` 提交包含 `public/statics/config.js` token 配置，清理历史前禁止直接推送。
 
 **需要你做的：**
 
-- 推送并部署 `scm-report-all`、`scm-vue-all-procurementscheme` 的本地提交；按 `20-开发交接-codex.md` 配 report 索引名和菜单。完成后告诉 AI，继续跑页面、查询和 Excel 导出验收。
+- 当前先不用推送。下一步由 AI 先把前端需求提交从既有 token 配置提交中安全拆出来；完成后再一次性给你推送、合入 test 和 Jenkins 清单。
 
 **当前不能承诺的：**
 
 - 不能把“本地构建通过”说成“test 页面已经可用”：report 和前端代码尚未部署，菜单尚未配置，当前新接口实测仍是 404。
 - 不能把 `centralizedProcurementBusinessManagementStatistics` 硬编码成索引名；真实物理索引必须以部署后的 Nacos/ES 为准。
 - 不能在当前 `feature/taizhang-yang` 上直接开发，也不能复用旧 `features/jicai`；二者都不是本需求的干净最新基线。
+- 不能直接推送当前前端 `features/jicai-report-yang`：历史提交 `3cc5230c` 已包含 token 配置，必须先清理或把需求提交迁到干净分支。
 
 ---
 
