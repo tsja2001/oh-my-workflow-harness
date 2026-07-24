@@ -19,7 +19,7 @@
 | `AGENTS.md` / `CLAUDE.md` | AI 入口（本文件） | AI |
 | `skills/enterprise-dev-workflow/` | 完整工作流规范：需求到验证 + 代码复盘与理解交接 + 命令手册/模板/提示词（独立 git） | AI |
 | `ai-docs/` | AI 自维护公用知识：`工作规范与习惯.md`（活文档，必读）、`工作日志.md`（共享记忆：所有改动的流水账）、`creds.env`（凭据，**禁止提交**） | AI |
-| `scripts/` | 公用工具：`dbq.sh` 查库、`esq.sh` 查 ES、`api.sh` 调 test 接口 | AI+用户 |
+| `scripts/` | 公用工具：`dbq.sh` 查库、`esq.sh` 查 ES、`api.sh` 调 test 接口、`fieldcheck.sh` 字段体检、`jc.sh` 隔离编译 | AI+用户 |
 | `docs/需求/<需求名>/` | 每个需求一个文件夹：需求原件 + 各阶段交接文档（命名规范见下） | AI |
 | `docs/工作文档日常记录/` | 用户自己的笔记 + 同事发来的文档（AI 可读，未经用户同意不改） | 用户 |
 | `note/` | 代码库结构知识（`project-ai-context.md`、`backend-env-setup.md`），查代码结构问题先看这里 | AI（主要 codex） |
@@ -74,6 +74,8 @@
   凡是带变量、引号、循环的命令**先写成脚本文件再执行**，内联会被边界吞掉（`$VAR` 变空、引号丢失）。UNC 路径上禁止全树搜索（会超时）。
 - **WSL 终端里的 AI**：直接跑 bash，无以上限制。
 - 查库：`bash scripts/dbq.sh "SELECT ..." [库名]`。查 ES：`bash scripts/esq.sh indices|mapping|count|head|one|search|agg|get|post ...`（详见脚本头注释）。调 test 接口：`bash scripts/api.sh POST /e/business/... '{json}'`。
+- **需求里拿来筛选/统计的字段，开工前必跑**：`bash scripts/fieldcheck.sh <表> <字段> [库]`（填充率<50% 是红灯，别默默按原口径写代码）。
+- 隔离编译：`bash scripts/jc.sh <仓库目录> <改过的.java 文件...>`，会自动分清"你的报错"和"环境漂移报错"。
 - 全量 mvn 编译是坏的（SNAPSHOT 漂移，同事也从不本地编译）；验证自己代码用隔离 javac，见 skill env-playbook 第 6 节。
 
 ## 活文档义务
