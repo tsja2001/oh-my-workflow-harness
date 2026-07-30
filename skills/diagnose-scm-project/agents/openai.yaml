@@ -1,0 +1,4 @@
+interface:
+  display_name: "SCM 项目诊断"
+  short_description: "从接口、页面、发布或任务出发，自动串联代码和平台证据"
+  default_prompt: "使用 $diagnose-scm-project 只读诊断这个 SCM 项目问题，先定位模块，再给出跨代码与平台的证据链。"
