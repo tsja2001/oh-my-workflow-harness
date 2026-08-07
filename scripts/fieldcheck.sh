@@ -28,8 +28,8 @@ cat > "$SQL" <<EOF
 SELECT '① 填充率（低于50%是红灯）' AS 检查项;
 SELECT COUNT(*) AS 总行数,
        SUM(CASE WHEN \`$F\` IS NULL THEN 1 ELSE 0 END) AS 空值,
-       SUM(CASE WHEN \`$F\` = '' THEN 1 ELSE 0 END) AS 空串,
-       CONCAT(ROUND(100 * SUM(CASE WHEN \`$F\` IS NOT NULL AND \`$F\` <> '' THEN 1 ELSE 0 END) / COUNT(*), 1), '%') AS 填充率
+       SUM(CASE WHEN CAST(\`$F\` AS CHAR) = '' THEN 1 ELSE 0 END) AS 空串,
+       CONCAT(ROUND(100 * SUM(CASE WHEN \`$F\` IS NOT NULL AND CAST(\`$F\` AS CHAR) <> '' THEN 1 ELSE 0 END) / COUNT(*), 1), '%') AS 填充率
 FROM \`$T\`;
 
 SELECT '② 取值分布（前20，核对字典和脏值）' AS 检查项;
@@ -42,10 +42,10 @@ if [ -n "$CT" ]; then
 
 SELECT '③ 有值 vs 无值 的时间窗口（按 $CT）' AS 检查项;
 SELECT '有值' AS 分组, COUNT(*) AS 行数, MIN(\`$CT\`) AS 最早, MAX(\`$CT\`) AS 最晚
-FROM \`$T\` WHERE \`$F\` IS NOT NULL AND \`$F\` <> ''
+FROM \`$T\` WHERE \`$F\` IS NOT NULL AND CAST(\`$F\` AS CHAR) <> ''
 UNION ALL
 SELECT '无值', COUNT(*), MIN(\`$CT\`), MAX(\`$CT\`)
-FROM \`$T\` WHERE \`$F\` IS NULL OR \`$F\` = '';
+FROM \`$T\` WHERE \`$F\` IS NULL OR CAST(\`$F\` AS CHAR) = '';
 EOF
 else
   echo "（提示：表 $T 没有 create_time/update_time 列，跳过时间窗口检查）"

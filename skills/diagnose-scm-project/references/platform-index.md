@@ -20,6 +20,7 @@ bash skills/diagnose-scm-project/scripts/platform.sh <平台> <动作> ...
 - Playwright 配置：`.playwright/cli.config.json`。
 - 会话缓存：用户缓存目录下的 `work-wsl-platforms` 和既有 `work-wsl-browser`，目录权限 700、cookie 文件权限 600，不进入 Git。
 - K8s 走 KubeSphere Web Session + Kubernetes GET API；Jenkins、项目文档走 Windows Chrome 网络桥接；调度和 Nacos 使用持久化只读浏览器会话。
+- K8s 日志两层获取：`k8s logs` 用 Pod log API 看**存活容器**实时日志；`k8s eslogs` 用 KubeSphere 日志查询 API（`/kapis/tenant.kubesphere.io/v1alpha2/logs`，集群 fluent-bit 全量采集进 Elasticsearch）查**历史/跨副本/全文检索**日志。Pod 滚动更新后旧日志只能用 `k8s eslogs` 找回。
 - 同一个浏览器 profile 由文件锁串行访问，避免两个查询互相改写页面状态。
 
 ## 凭据变量名

@@ -442,6 +442,146 @@ k8s_logs() {
   rm -f "$output_file"
 }
 
+k8s_eslogs() {
+  local env_name="$1"
+  local query="$2"
+  shift 2
+  valid_k8s_name "$query"
+
+  local tail_lines=300
+  local errors_only=0
+  local since_spec=""
+  local since_seconds=""
+  local match=""
+  while (($#)); do
+    case "$1" in
+      --tail)
+        [[ $# -ge 2 && "$2" =~ ^[0-9]+$ ]] || die "--tail 后必须是数字"
+        tail_lines="$2"
+        shift 2
+        ;;
+      --errors)
+        errors_only=1
+        shift
+        ;;
+      --since)
+        [[ $# -ge 2 && "$2" =~ ^[1-9][0-9]*[smhd]$ ]] ||
+          die "--since 格式必须是正整数加 s/m/h/d，例如 30m、3h、2d"
+        since_spec="$2"
+        shift 2
+        ;;
+      --match)
+        [[ $# -ge 2 && -n "$2" ]] || die "--match 后必须有正则关键词"
+        ((${#2} <= 200)) || die "--match 不能超过 200 个字符"
+        [[ "$2" != *$'\n'* && "$2" != *$'\r'* ]] ||
+          die "--match 不能包含换行"
+        match="$2"
+        shift 2
+        ;;
+      *) die "未知日志参数：$1" ;;
+    esac
+  done
+  ((${#tail_lines} <= 4)) || die "--tail 数值过大"
+  ((tail_lines >= 1)) || die "--tail 必须大于 0"
+  if [[ -n "$match" ]]; then
+    ((tail_lines <= 5000)) ||
+      die "使用 --match 时，--tail 最大为 5000"
+  else
+    ((tail_lines <= 2000)) ||
+      die "未使用 --match 时，--tail 最大为 2000"
+  fi
+
+  if [[ -n "$since_spec" ]]; then
+    local since_value="${since_spec%?}"
+    ((${#since_value} <= 6)) ||
+      die "--since 数值过大；最大允许 7d"
+    case "${since_spec: -1}" in
+      s) since_seconds="$since_value" ;;
+      m) since_seconds="$((since_value * 60))" ;;
+      h) since_seconds="$((since_value * 3600))" ;;
+      d) since_seconds="$((since_value * 86400))" ;;
+    esac
+    ((since_seconds <= 604800)) ||
+      die "--since 最大为 7d；更长时间请先缩小问题窗口"
+  fi
+
+  k8s_select_connection "$env_name"
+  k8s_ensure_login
+
+  local param="workloads"
+  local value=""
+  if [[ "$query" =~ -[a-z0-9]{9,10}-[a-z0-9]{5}$ ]]; then
+    param="pods"
+    value="$query"
+  else
+    value="$(resolve_deployment "$query")"
+  fi
+  [[ -n "$value" ]] || die "命名空间 $KS_NAMESPACE 未找到 Deployment 或 Pod：$query"
+
+  local path="/kapis/tenant.kubesphere.io/v1alpha2/logs?operation=query"
+  path="$path&namespaces=$KS_NAMESPACE&$param=$(urlencode "$value")"
+  local end_time start_time
+  end_time="$(date +%s)"
+  if [[ -n "$since_spec" ]]; then
+    start_time="$((end_time - since_seconds))"
+    path="$path&start_time=$start_time&end_time=$end_time"
+  fi
+  local log_query=""
+  if [[ -n "$match" && "$match" =~ ^[A-Za-z0-9_]+$ ]]; then
+    log_query="$match"
+    path="$path&log_query=$(urlencode "$log_query")"
+  fi
+  path="$path&size=$tail_lines&sort=desc"
+
+  local raw_file total
+  raw_file="$(mktemp "$CACHE_ROOT/k8s-eslog-raw.XXXXXX")"
+  chmod 600 "$raw_file"
+  if ! k8s_get "$path" >"$raw_file"; then
+    rm -f "$raw_file"
+    return 1
+  fi
+  total="$(jq -r '.query.total // 0' "$raw_file")"
+  printf 'ES 日志窗口内命中 %s 条，已取最新 %s 条%s\n' \
+    "$total" "$tail_lines" \
+    "${log_query:+（关键词 $log_query 已下推检索）}" >&2
+
+  local output_file
+  output_file="$(mktemp "$CACHE_ROOT/k8s-eslog.XXXXXX")"
+  chmod 600 "$output_file"
+  if ! jq -r '
+      .query.records[]? |
+      (.time // "") as $t |
+      (.log // "" | sub("\n$"; "")) as $l |
+      "\($t) \($l)"
+    ' "$raw_file" | LC_ALL=C sort -k1,1 >"$output_file"; then
+    rm -f "$raw_file" "$output_file"
+    return 1
+  fi
+  rm -f "$raw_file"
+
+  if [[ "$errors_only" -eq 1 ]]; then
+    if ! node "$SAFE_OUTPUT" errors <"$output_file" >"$output_file.clean"; then
+      rm -f "$output_file" "$output_file.clean"
+      return 1
+    fi
+  else
+    node "$SAFE_OUTPUT" redact <"$output_file" >"$output_file.clean"
+  fi
+
+  if [[ -n "$match" ]]; then
+    local matched_output
+    matched_output="$(rg -i -- "$match" "$output_file.clean" | sed -n '1,500p' || true)"
+    if [[ -n "$matched_output" ]]; then
+      printf '%s\n' "$matched_output"
+    else
+      printf 'INFO 在指定窗口内未找到匹配日志；这不代表历史上从未出现。\n'
+    fi
+  else
+    cat "$output_file.clean"
+  fi
+  rm -f "$output_file" "$output_file.clean"
+}
+
 k8s_events() {
   local env_name="$1"
   local query="$2"
@@ -1169,6 +1309,7 @@ main() {
         deployment) [[ $# -eq 4 ]] || die "用法：k8s deployment <环境> <deployment>"; k8s_deployment "$3" "$4" ;;
         pods) [[ $# -le 4 ]] || die "用法：k8s pods <环境> [名称片段]"; k8s_pods "$3" "${4:-}" ;;
         logs) [[ $# -ge 4 ]] || die "用法：k8s logs <环境> <pod或deployment>"; shift 2; k8s_logs "$@" ;;
+        eslogs) [[ $# -ge 4 ]] || die "用法：k8s eslogs <环境> <deployment或pod> [--tail N] [--since X] [--match RE] [--errors]"; shift 2; k8s_eslogs "$@" ;;
         events) [[ $# -eq 4 ]] || die "用法：k8s events <环境> <pod或deployment>"; k8s_events "$3" "$4" ;;
         diagnose) [[ $# -eq 4 ]] || die "用法：k8s diagnose <环境> <deployment>"; k8s_diagnose "$3" "$4" ;;
         *) die "未知 K8s 命令：$2" ;;

@@ -8,12 +8,19 @@ skills/enterprise-dev-workflow/
 
 # 凭据（红线：永不提交）
 ai-docs/creds.env
+# 该原始笔记含历史登录凭据/Cookie，只读保留但禁止提交
+docs/工作文档日常记录/skill需求拆解4.md
 
 # 工具缓存
 scripts/.cache/
+ai-docs/.auth-cache/
+.playwright-cli/
 *.class
 
 # 系统与编辑器杂物
 .DS_Store
 Thumbs.db
 .idea/
+
+# 机场订阅备份（含服务器地址与凭据，不入库）
+docs/工作文档日常记录/clash备份.yaml

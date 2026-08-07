@@ -18,8 +18,8 @@
 |---|---|---|
 | `AGENTS.md` / `CLAUDE.md` | AI 入口（本文件） | AI |
 | `skills/enterprise-dev-workflow/` | 完整工作流规范：需求到验证 + 代码复盘与理解交接 + 命令手册/模板/提示词（独立 git） | AI |
-| `ai-docs/` | AI 自维护公用知识：`工作规范与习惯.md`（活文档，必读）、`工作日志.md`（共享记忆：所有改动的流水账）、`creds.env`（凭据，**禁止提交**） | AI |
-| `scripts/` | 公用工具：`dbq.sh` 查库、`esq.sh` 查 ES、`api.sh` 调 test 接口、`fieldcheck.sh` 字段体检、`jc.sh` 隔离编译 | AI+用户 |
+| `ai-docs/` | AI 自维护公用知识：`工作规范与习惯.md`（活文档，必读）、`工作日志.md`（共享记忆：所有改动的流水账）、`前端页面定位.md`（找前端页面先看它）、`creds.env`（凭据，**禁止提交**） | AI |
+| `scripts/` | 公用工具：`auth.sh` 自动登录、`api.sh` 调 test/UAT 接口、`dbq.sh` 查库、`esq.sh` 查 ES、`fe.sh` 找前端页面、`fieldcheck.sh` 字段体检、`jc.sh` 隔离编译、`srun.sh` 本地起 scm-source | AI+用户 |
 | `docs/需求/<需求名>/` | 每个需求一个文件夹：需求原件 + 各阶段交接文档（命名规范见下） | AI |
 | `docs/工作文档日常记录/` | 用户自己的笔记 + 同事发来的文档（AI 可读，未经用户同意不改） | 用户 |
 | `note/` | 代码库结构知识（`project-ai-context.md`、`backend-env-setup.md`），查代码结构问题先看这里 | AI（主要 codex） |
@@ -73,9 +73,14 @@
 - **Windows 侧 AI**（桌面 app / Windows 终端）：执行命令一律 `wsl.exe -d ubuntu-24.04 -- bash /tmp/xx.sh`——
   凡是带变量、引号、循环的命令**先写成脚本文件再执行**，内联会被边界吞掉（`$VAR` 变空、引号丢失）。UNC 路径上禁止全树搜索（会超时）。
 - **WSL 终端里的 AI**：直接跑 bash，无以上限制。
-- 查库：`bash scripts/dbq.sh "SELECT ..." [库名]`。查 ES：`bash scripts/esq.sh indices|mapping|count|head|one|search|agg|get|post ...`（详见脚本头注释）。调 test 接口：`bash scripts/api.sh POST /e/business/... '{json}'`。
+- 业务接口登录：`bash scripts/auth.sh doctor|status|login [test|uat] [admin|supplier]`，token 自动写入 gitignored 缓存且不输出。调接口继续兼容 `bash scripts/api.sh POST /e/business/... '{json}'`；UAT/云采/供应商用 `--env`、`--platform`、`--account`，过期会自动重登一次。
+- 查库：`bash scripts/dbq.sh "SELECT ..." [库名]`。查 ES：`bash scripts/esq.sh indices|mapping|count|head|one|search|agg|get|post ...`（详见脚本头注释）。
+- **找前端页面禁止上来就全树 grep**：先 `bash scripts/fe.sh find <中文关键词>` / `fe.sh api <接口片段>` / `fe.sh url <页面地址>`，
+  离线表秒回「菜单中文名 → 前端仓库 → 路由第几行 → .vue 文件」。前端 52 个仓（新旧同名重复）、1274 条路由，硬搜必踩错仓。
+  有一类「动态页」的页面定义在后端 JSON 里、源码根本搜不到，用 `fe.sh json <module>/<type>` 查。原理与边界见 `ai-docs/前端页面定位.md`。
 - **需求里拿来筛选/统计的字段，开工前必跑**：`bash scripts/fieldcheck.sh <表> <字段> [库]`（填充率<50% 是红灯，别默默按原口径写代码）。
 - 隔离编译：`bash scripts/jc.sh <仓库目录> <改过的.java 文件...>`，会自动分清"你的报错"和"环境漂移报错"。
+- 本地起 scm-source 验接口：`bash scripts/srun.sh build|start|wait|status|stop`（**start 必须经后台运行保活**，别用 `nohup &` 会秒死；原理与坑见 `note/backend-env-setup.md §0`）。
 - 全量 mvn 编译是坏的（SNAPSHOT 漂移，同事也从不本地编译）；验证自己代码用隔离 javac，见 skill env-playbook 第 6 节。
 
 ## 活文档义务

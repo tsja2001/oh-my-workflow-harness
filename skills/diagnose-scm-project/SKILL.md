@@ -66,6 +66,9 @@ The scenario command intentionally keeps output compact. Use the low-level adapt
 PLATFORM="skills/diagnose-scm-project/scripts/platform.sh"
 
 bash "$PLATFORM" k8s logs uat scm-order-web --since 3h --tail 10000 --match 'centralPurchase|methodHandler|ERROR'
+# 日志检索走 ES 全量采集（fluent-bit→Elasticsearch）：历史日志、跨副本聚合、全文搜索
+bash "$PLATFORM" k8s eslogs uat scm-order-web --since 3h --match centralPurchase --tail 500
+bash "$PLATFORM" k8s eslogs uat scm-order-web --since 30m --errors --tail 200
 bash "$PLATFORM" jenkins evidence scm-order-web-uat lastBuild
 bash "$PLATFORM" nacos keys uat scm-order-web-uat.yaml common
 bash "$PLATFORM" scheduling jobs uat --executor 6 --desc '集采' --status all

@@ -1,0 +1,167 @@
+{
+  "info": {
+    "name": "集采首页取值(06) - source",
+    "_postman_id": "jc-portal-06-collection",
+    "description": "集采门户首页取值接口测试集。\n\n【怎么用】\n1. 右上角选中本集合 → Variables 标签，填两个变量：\n   - baseUrl：本地跑 source 时填 http://localhost:8110/scm-source-web（默认已填）；走 test 网关时改成你 creds.env 里的 GATEWAY 地址。\n   - token：从浏览器登录 test 前端 → F12 → 任一请求 → Authorization 里 'bearer ' 后面那一整串（不含 bearer 前缀）粘进来。\n2. 先跑「首页取值 / overview(默认)」，看返回 data 里 core/groups/categories/coalTransaction/steelTransaction 有没有金额。\n3. 想对某个历史查询日对账，用「overview(指定查询日)」改 body 里的 queryDate。\n\n【说明】接口需登录态，未带 token 会返回 900301/未授权。金额单位为万元、两位小数；比率为百分比数值。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8110/scm-source-web", "type": "string" },
+    { "key": "token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "首页取值",
+      "item": [
+        {
+          "name": "overview(默认, 当天为查询日)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": {
+              "raw": "{{baseUrl}}/e/business/source/centralizedProcurementPortal/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["e", "business", "source", "centralizedProcurementPortal", "overview"]
+            },
+            "description": "不传参数：以服务器当天为查询日，统计到前一天。返回首页全部金额卡片。"
+          }
+        },
+        {
+          "name": "overview(指定查询日, 用于对账)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"queryDate\": \"2026-08-03\"\n}" },
+            "url": {
+              "raw": "{{baseUrl}}/e/business/source/centralizedProcurementPortal/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["e", "business", "source", "centralizedProcurementPortal", "overview"]
+            },
+            "description": "传 queryDate(yyyy-MM-dd)：以该日为查询日、统计到其前一天。方便和某一天的明细对账。"
+          }
+        }
+      ]
+    },
+    {
+      "name": "趋势/坑口(与驾驶舱共用接口)",
+      "item": [
+        {
+          "name": "煤炭重点坑口指标 kengk",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "bearer {{token}}" } ],
+            "url": {
+              "raw": "{{baseUrl}}/e/business/source/source/cockpit_collection_data_kengk",
+              "host": ["{{baseUrl}}"],
+              "path": ["e", "business", "source", "source", "cockpit_collection_data_kengk"]
+            },
+            "description": "煤炭坑口指标。当前仍读旧缓存表 sc_collection_data，本期任务是改读坑口台账 sc_coal_pit_daily_indicator。"
+          }
+        },
+        {
+          "name": "近12月煤价趋势 mt",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "bearer {{token}}" } ],
+            "url": {
+              "raw": "{{baseUrl}}/e/business/source/source/cockpit_collection_data_mt",
+              "host": ["{{baseUrl}}"],
+              "path": ["e", "business", "source", "source", "cockpit_collection_data_mt"]
+            },
+            "description": "近12个月煤价趋势。当前读旧缓存(停在2024-2025)，本期改读价格趋势台账 sc_price_trend(category_name=煤炭)。"
+          }
+        },
+        {
+          "name": "近12月钢价/螺纹/中厚板 gc",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "bearer {{token}}" } ],
+            "url": {
+              "raw": "{{baseUrl}}/e/business/source/source/cockpit_collection_data_gc",
+              "host": ["{{baseUrl}}"],
+              "path": ["e", "business", "source", "source", "cockpit_collection_data_gc"]
+            },
+            "description": "近12个月钢价 + 螺纹钢/中厚板。当前读旧缓存，本期改读 sc_price_trend(category_name=钢材, indicator_name 区分品种)。"
+          }
+        }
+      ]
+    },
+    {
+      "name": "可选-手动同步ES(默认同步昨天)",
+      "item": [
+        {
+          "name": "同步 非平台FP",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": {
+              "raw": "{{baseUrl}}/e/business/source/centralizedProcurementReport/sync",
+              "host": ["{{baseUrl}}"],
+              "path": ["e", "business", "source", "centralizedProcurementReport", "sync"]
+            },
+            "description": "把非平台录入昨天的新数据同步进统一ES。可传 {\"startTime\":\"2026-01-01 00:00:00\",\"endTime\":\"2026-08-02 23:59:59\"} 补历史。ES已有数据时无需跑。"
+          }
+        },
+        {
+          "name": "同步 招采ZC",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": {
+              "raw": "{{baseUrl}}/e/business/source/centralizedProcurementReport/syncZc",
+              "host": ["{{baseUrl}}"],
+              "path": ["e", "business", "source", "centralizedProcurementReport", "syncZc"]
+            }
+          }
+        },
+        {
+          "name": "同步 煤炭MT",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": {
+              "raw": "{{baseUrl}}/e/business/source/centralizedProcurementReport/syncMt",
+              "host": ["{{baseUrl}}"],
+              "path": ["e", "business", "source", "centralizedProcurementReport", "syncMt"]
+            }
+          }
+        },
+        {
+          "name": "同步 机电JD",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "bearer {{token}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": {
+              "raw": "{{baseUrl}}/e/business/source/centralizedProcurementReport/syncJd",
+              "host": ["{{baseUrl}}"],
+              "path": ["e", "business", "source", "centralizedProcurementReport", "syncJd"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

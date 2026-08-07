@@ -1,0 +1,22 @@
+{
+  "browser": {
+    "browserName": "chromium",
+    "initPage": [
+      "../scripts/browser/readonly-guard.js"
+    ],
+    "launchOptions": {
+      "channel": "chromium",
+      "headless": true
+    }
+  },
+  "outputDir": "/home/t/.cache/work-wsl-browser/artifacts",
+  "outputMode": "stdout",
+  "console": {
+    "level": "error"
+  },
+  "timeouts": {
+    "action": 10000,
+    "navigation": 60000
+  },
+  "allowUnrestrictedFileAccess": false
+}

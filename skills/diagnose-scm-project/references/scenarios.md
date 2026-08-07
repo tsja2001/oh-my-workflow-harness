@@ -67,6 +67,12 @@ bash "$PLATFORM" k8s logs uat scm-order-web --previous --tail 800 --errors
 2. Nacos placeholder/bind failure、bean creation failure、端口、连接拒绝。
 3. Pod events 中的拉镜像、探针、调度、OOM。
 
+若 Pod 已被滚动更新删掉（原日志在 `k8s logs` 不可见），改用 ES 检索：
+
+```bash
+bash "$PLATFORM" k8s eslogs uat scm-order-web --since 3h --match 'Caused by|BeanCreationException' --tail 500
+```
+
 如果异常指向缺少配置：
 
 ```bash

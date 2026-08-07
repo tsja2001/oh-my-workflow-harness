@@ -1,0 +1,45 @@
+pipeline {
+    agent none
+
+    options {
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('顺序部署 test') {
+            steps {
+                script {
+                    def jobs = [
+                        'scm-auth-web-test',
+                        'scm-gateway-web-test',
+                        'scm-gateway-mall-web-test',
+                        'scm-ifs-web-test',
+                        'scm-ifs-schedule-web-test',
+                        'scm-source-web-test',
+                        'scm-order-web-test',
+                        'scm-product-web-test',
+                        'scm-srm-web-test',
+                        'scm-contract-web-test',
+                        'scm-report-web-test',
+                        'scm-ubm-web-test',
+                        'scm-ubm-mall-web-test',
+                        'scm-file-web-test',
+                        'scm-professor-web-test',
+                        'scm-scheduling-web-test',
+                        'scm-devops-web-test',
+                        'scm-workflow-web-test',
+                        'scm-fee-web-test',
+                        'scm-dps-service-web-test',
+                        'scm-dps-web-test',
+                        'scm-dpscore-web-test'
+                    ]
+
+                    for (jobName in jobs) {
+                        echo "开始部署：${jobName}"
+                        build job: jobName, wait: true, propagate: true
+                    }
+                }
+            }
+        }
+    }
+}
