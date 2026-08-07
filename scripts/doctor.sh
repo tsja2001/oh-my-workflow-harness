@@ -14,17 +14,18 @@ set -u
 DIR="$(cd "$(dirname "$0")/.." && pwd)"
 CREDS="$DIR/ai-docs/creds.env"
 
-DO_FETCH=0; DO_AUTH=0; SECTION="all"
+DO_FETCH=0; DO_AUTH=0; SECTIONS=""
 for a in "$@"; do
   case "$a" in
     --fetch) DO_FETCH=1 ;;
     --auth)  DO_AUTH=1 ;;
-    env|creds|db|es|repos) SECTION="$a" ;;
+    env|creds|db|es|repos) SECTIONS="$SECTIONS $a" ;;
     -h|--help) sed -n '2,13p' "$0"; exit 0 ;;
     *) echo "未知参数: $a（-h 看用法）"; exit 1 ;;
   esac
 done
-run() { [ "$SECTION" = "all" ] || [ "$SECTION" = "$1" ]; }
+# 不指定小节 = 全跑；可以一次指定多个，如 doctor.sh db es
+run() { [ -z "$SECTIONS" ] || [[ " $SECTIONS " == *" $1 "* ]]; }
 
 ok()   { printf '  \033[32m✓\033[0m %s\n' "$*"; }
 bad()  { printf '  \033[31m✗\033[0m %s\n' "$*"; }
