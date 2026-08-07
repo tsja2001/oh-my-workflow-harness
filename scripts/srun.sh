@@ -23,7 +23,7 @@
 #     所以 start 必须经 Bash 工具的 run_in_background=true 调用（wsl.exe 常驻→java 存活）；wait/status/stop 前台调。
 #   - 启动参数固定且缺一不可：APP_PROFILE=test + -Dnacos.ip 顶掉集群内 DNS + register-enabled=false（否则本机
 #     被登记进 test 服务发现，可能被转发真实流量）+ fastjson safeMode。
-#   - 原理与依赖对齐（跨团队 SNAPSHOT 漂移）细节见 note/backend-env-setup.md 与 docs/需求/07开发本地运行java环境/。
+#   - 原理与依赖对齐（跨团队 SNAPSHOT 漂移）细节见 ai-docs/本地运行手册.md 与 docs/需求/07开发本地运行java环境/。
 set -u
 DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
