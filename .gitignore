@@ -15,11 +15,13 @@ docs/工作文档日常记录/skill需求拆解4.md
 scripts/.cache/
 ai-docs/.auth-cache/
 .playwright-cli/
+.workbuddy/
 *.class
 
 # 系统与编辑器杂物
 .DS_Store
 Thumbs.db
+*:Zone.Identifier
 .idea/
 
 # 机场订阅备份（含服务器地址与凭据，不入库）
