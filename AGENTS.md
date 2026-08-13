@@ -37,6 +37,7 @@
 |---|---|
 | **刚接手，想知道环境和分支现在什么状态** | `bash scripts/doctor.sh`（30 秒，开工前建议再跑一次 `--fetch`） |
 | 推需求/走完整开发流程 | `skills/enterprise-dev-workflow/SKILL.md`（cc 会自动触发；其他工具手动读） |
+| 开发 Excel 导出、配置或修复导出模板 | `skills/enterprise-dev-workflow/references/export-template-playbook.md`（普通列表导出默认必须走平台模板） |
 | 线上异常排查：404/502、没数据、任务失败、镜像旧、配置漂移 | `skills/diagnose-scm-project/SKILL.md`（脚本型，先跑命令别先猜） |
 | 分支怎么开、提交怎么进 test、发版 test→uat→prod 找谁 | [ai-docs/团队规矩.md](ai-docs/团队规矩.md) |
 | 这个问题该问人还是自己拍板、话术怎么写、怎么跟用户讲 | [ai-docs/协作规矩.md](ai-docs/协作规矩.md) |

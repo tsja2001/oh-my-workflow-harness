@@ -1,0 +1,32 @@
+{
+  "templateCode": "example-ledger-export",
+  "templateDesc": "示例台账导出",
+  "groupCode": "source",
+  "groupName": "寻源模块",
+  "status": "1",
+  "checkCode": "",
+  "enableCheckCode": "false",
+  "details": [
+    {
+      "sortName": "0",
+      "fieldName": "INDEX",
+      "fieldVal": "序号",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "1",
+      "fieldName": "businessName",
+      "fieldVal": "业务名称",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "2",
+      "fieldName": "taxAmount",
+      "fieldVal": "含税金额",
+      "fieldType": "BigDecimal",
+      "status": "1"
+    }
+  ]
+}
