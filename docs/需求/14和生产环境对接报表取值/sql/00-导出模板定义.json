@@ -1,0 +1,116 @@
+{
+  "templateCode": "centralized-procurement-export",
+  "templateDesc": "集采管理业务统计报表导出",
+  "groupCode": "报表查询",
+  "groupName": "报表查询",
+  "status": "1",
+  "checkCode": "",
+  "enableCheckCode": "false",
+  "details": [
+    {
+      "sortName": "0",
+      "fieldName": "INDEX",
+      "fieldVal": "序号",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "1",
+      "fieldName": "buName",
+      "fieldVal": "板块名称",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "2",
+      "fieldName": "purchaseCompanyName",
+      "fieldVal": "采购企业",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "3",
+      "fieldName": "supplierName",
+      "fieldVal": "供应商",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "4",
+      "fieldName": "planCode",
+      "fieldVal": "采购方案/订单编号",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "5",
+      "fieldName": "planName",
+      "fieldVal": "业务名称",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "6",
+      "fieldName": "materialCode",
+      "fieldVal": "物料编码",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "7",
+      "fieldName": "materialName",
+      "fieldVal": "物料描述",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "8",
+      "fieldName": "categoryCode",
+      "fieldVal": "类目编码",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "9",
+      "fieldName": "categoryName",
+      "fieldVal": "类目描述",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "10",
+      "fieldName": "taxTotal",
+      "fieldVal": "交易金额（含税）",
+      "fieldType": "BigDecimal",
+      "status": "1"
+    },
+    {
+      "sortName": "11",
+      "fieldName": "bookTimeStr",
+      "fieldVal": "公示/下单时间",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "12",
+      "fieldName": "isCentralizedDesc",
+      "fieldVal": "是否集采",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "13",
+      "fieldName": "purchaseType",
+      "fieldVal": "采购业务类型",
+      "fieldType": "String",
+      "status": "1"
+    },
+    {
+      "sortName": "14",
+      "fieldName": "dataSourceDesc",
+      "fieldVal": "数据来源",
+      "fieldType": "String",
+      "status": "1"
+    }
+  ]
+}
