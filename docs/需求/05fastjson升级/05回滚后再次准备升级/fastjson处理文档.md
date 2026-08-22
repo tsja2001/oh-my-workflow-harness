@@ -5,7 +5,7 @@
 | 1 | 删除了 `TypeUtils.getClassFromMapping()` | 编译直接过不去 | 2 处 |
 | 2 | `JSONObject` 转泛型 `Map<String,Object>` 时，Date 会变成 String | 上次寻源列表操作按钮消失 | 2 处 |
 | 3 | `JSON.toJSON()` 不再递归转换 —— Map 的值和数组保持原样（1.x 会全部转成 JSONObject） | 上次 IFS 京东商品同步报找不到 get 方法 | 22处  |
-| 4 | `JSONObject.toJSONString()` **实例写法**输出日期变成字符串，而静态写法 `JSON.toJSONString(x)` 仍是时间戳 —— 同一件事两种写法结果相反 | 报文内容变了。流程审批 DPS 对接拿它算 MD5 签名，签名会对不上 | 21 处 |
+| 4 | `JSONObject.toJSONString()` 实例写法 输出日期变成字符串，而静态写法 `JSON.toJSONString(x)` 仍是时间戳 —— 同一件事两种写法结果相反 | 报文内容变了 | 21 处 |
 | 5 | `java.time.LocalDate/LocalDateTime` 序列化从字符串变成时间戳 | 接口报文格式变 | 4处 |
 | 6 | 反序列化时 null / 空字符串给 int、boolean，会把字段默认值冲成 0 / false（1.x 保留默认值） | 字段值被意外清零 | 未使用到 |
 
