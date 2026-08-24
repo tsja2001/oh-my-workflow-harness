@@ -300,6 +300,9 @@ function Test-WindowsSshLogin {
         -RedirectStandardOutput $stdoutPath `
         -RedirectStandardError $stderrPath `
         -PassThru
+    # Windows PowerShell 5.1 may leave ExitCode empty unless the process handle
+    # is materialized before the timed WaitForExit call.
+    $null = $process.Handle
     if (-not $process.WaitForExit(20000)) {
         Stop-Process -Id $process.Id -Force -ErrorAction SilentlyContinue
         $process.WaitForExit()
