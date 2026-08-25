@@ -6,6 +6,9 @@
 
 # 凭据（红线：永不提交）
 ai-docs/creds.env
+ai-docs/creds.env.*
+!ai-docs/creds.env.example
+ai-docs/.creds.env*
 
 # 工具缓存
 scripts/.cache/

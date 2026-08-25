@@ -12,7 +12,7 @@ source "$ROOT_DIR/scripts/lib/scm-auth.sh"
 
 usage() {
   sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'
-  printf '\n参数：--env test|uat；--platform procurement|cloud；--account admin|supplier\n'
+  printf '\n参数：--env test|uat；--platform procurement|cloud；--account <别名，见 scripts/perm.sh accounts>\n'
 }
 
 environment="${SCM_API_ENV:-test}"

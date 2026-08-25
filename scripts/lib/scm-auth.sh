@@ -85,26 +85,35 @@ scm_auth_normalize() {
   fi
   SCM_AUTH_LOGIN_GATEWAY="${SCM_AUTH_LOGIN_GATEWAY%/}"
 
-  case "$account" in
-    admin)
-      SCM_AUTH_USERNAME="${SCM_ADMIN_USER:-}"
-      SCM_AUTH_PASSWORD="${SCM_ADMIN_PASS:-}"
-      if [ "$environment" = "test" ]; then
-        SCM_AUTH_LEGACY_TOKEN="${TOKEN:-}"
-      else
-        SCM_AUTH_LEGACY_TOKEN="${UAT_TOKEN:-}"
-      fi
-      ;;
-    supplier)
-      SCM_AUTH_USERNAME="${SCM_SUPPLIER_USER:-}"
-      SCM_AUTH_PASSWORD="${SCM_SUPPLIER_PASS:-}"
-      SCM_AUTH_LEGACY_TOKEN=""
-      ;;
-    *)
-      scm_auth_error "账号只能是 admin 或 supplier"
-      return 1
-      ;;
-  esac
+  # 账号别名表驱动：creds.env 里每有一对 SCM_<别名大写>_USER / _PASS，就多一个可用别名。
+  # 加账号不需要改这里。可用别名见 scm_auth_aliases。
+  local alias_upper user_key pass_key
+  alias_upper="$(printf '%s' "$account" | tr 'a-z-' 'A-Z_')"
+  user_key="SCM_${alias_upper}_USER"
+  pass_key="SCM_${alias_upper}_PASS"
+  SCM_AUTH_USERNAME="${!user_key:-}"
+  SCM_AUTH_PASSWORD="${!pass_key:-}"
+  if [ -z "$SCM_AUTH_USERNAME" ] || [ -z "$SCM_AUTH_PASSWORD" ]; then
+    scm_auth_error "未知账号别名 $account（creds.env 里缺 $user_key / $pass_key）。可用别名：$(scm_auth_aliases | tr '\n' ' ')"
+    return 1
+  fi
+  # 手工粘贴的 legacy token 只对 admin 有意义（历史用法，见 creds.env 注释）
+  if [ "$account" = "admin" ]; then
+    if [ "$environment" = "test" ]; then
+      SCM_AUTH_LEGACY_TOKEN="${TOKEN:-}"
+    else
+      SCM_AUTH_LEGACY_TOKEN="${UAT_TOKEN:-}"
+    fi
+  else
+    SCM_AUTH_LEGACY_TOKEN=""
+  fi
+}
+
+# 列出 creds.env 里配好的账号别名（小写，一行一个）。不打印任何值。
+scm_auth_aliases() {
+  [ -r "$SCM_AUTH_CREDS_FILE" ] || return 0
+  sed -n 's/^[[:space:]]*SCM_\([A-Z0-9_]*\)_USER=.*/\1/p' "$SCM_AUTH_CREDS_FILE" \
+    | grep -vE '^(TEST|UAT)$' | awk '!seen[$0]++' | tr 'A-Z' 'a-z'
 }
 
 scm_auth_cache_file() {

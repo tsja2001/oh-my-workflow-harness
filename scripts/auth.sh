@@ -24,7 +24,7 @@ case "$command_name" in
     scm_auth_load_creds
     failed=0
     for environment_name in test uat; do
-      for account_name in admin supplier; do
+      for account_name in $(scm_auth_aliases); do
         if ! scm_auth_status "$environment_name" "$account_name"; then
           failed=1
         fi
@@ -37,7 +37,7 @@ case "$command_name" in
       scm_auth_status "$environment" "${account:-admin}"
     else
       for environment_name in test uat; do
-        for account_name in admin supplier; do
+        for account_name in $(scm_auth_aliases); do
           scm_auth_status "$environment_name" "$account_name"
         done
       done
