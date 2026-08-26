@@ -345,6 +345,63 @@ cmd_cover() {
   fi
 }
 
+# 供应商账号能不能对某个采购单位投标：入网/黑名单/冻结/服务关系 一次看全
+cmd_supplier() {
+  local a="${1:-supplier}" buyer="${2:-}"
+  local login; login="$(login_of "$a")"
+  [ -n "$login" ] || { echo "别名 $a 没配"; exit 1; }
+  local srmdb="scm_srm_${ENV_NAME}"
+  header; printf '供应商别名=%s\n\n' "$a"
+  qs() { mysql -h"$DB_HOST" -P"${DB_PORT:-3306}" -u"$DB_USER" -p"$DB_PASS" \
+              --default-character-set=utf8mb4 --table "$srmdb" -e "$1" 2>/dev/null; }
+  qsr() { mysql -h"$DB_HOST" -P"${DB_PORT:-3306}" -u"$DB_USER" -p"$DB_PASS" \
+              --default-character-set=utf8mb4 -N -B "$srmdb" -e "$1" 2>/dev/null; }
+  local e; e="$(esc "$login")"
+
+  printf '— ① 供应商主档（srm_company）—\n'
+  qs "SELECT company_code 供应商编码, LEFT(company_name,26) 名称,
+             endisable_status_name 启用状态,
+             IF(black_sign IS NULL,'否','⚠是') 已拉黑,
+             IF(freeze_sign IS NULL,'否','⚠是') 已冻结,
+             LEFT(audit_company_name,20) 入网审核单位
+        FROM srm_company WHERE company_name='$e' AND delete_sign=0"
+
+  printf '\n— ② 入网/扩充申请（srm_apply）—\n'
+  qs "SELECT apply_info_name 申请类型, apply_status_name 状态, COUNT(*) 条数, MAX(create_time) 最近
+        FROM srm_apply WHERE company_name='$e' AND delete_sign=0
+       GROUP BY 1,2 ORDER BY 4 DESC LIMIT 8"
+
+  printf '\n— ③ 服务关系：这家供应商服务哪些采购单位（决定能对谁投标）—\n'
+  qs "SELECT service_company_code 编码, LEFT(service_company_name,26) 服务对象,
+             relation_status_name 状态
+        FROM srm_company_servicerela WHERE company_name='$e' AND delete_sign=0
+       ORDER BY service_company_name LIMIT 20"
+  printf '  注：服务关系登记在【板块/二级集团】那一层（如 10010000 冀东水泥），\n'
+  printf '      不是逐个公司登记。下级公司发的标，靠上级板块的服务关系覆盖。【实测】\n'
+
+  if [ -n "$buyer" ]; then
+    printf '\n— ④ 对【%s】能不能投标 —\n' "$buyer"
+    local orgrow
+    orgrow="$(qr "SELECT CONCAT(org_code,'|',org_name,'|',COALESCE(parent_org_code,'-'),'|',COALESCE(parent_org_name,'-'),'|',COALESCE(belong_bu_code,'-'),'|',COALESCE(belong_bu_name,'-'))
+                    FROM ubm_organization WHERE org_name LIKE '%$(esc "$buyer")%' LIMIT 1")"
+    if [ -z "$orgrow" ]; then printf '  ✗ 在 ubm_organization 里找不到这个采购单位\n'; return 0; fi
+    local oc on pc pn bc bn
+    IFS='|' read -r oc on pc pn bc bn <<<"$orgrow"
+    printf '  采购单位：%s (%s)\n  上级：%s (%s)\n  所属板块：%s (%s)\n' "$on" "$oc" "$pn" "$pc" "$bn" "$bc"
+    local hit
+    hit="$(qsr "SELECT service_company_name FROM srm_company_servicerela
+                 WHERE company_name='$e' AND delete_sign=0
+                   AND service_company_code IN ('$oc','$pc','$bc') LIMIT 3")"
+    if [ -n "$hit" ]; then
+      printf '  ✅ 有服务关系覆盖：%s\n' "$(printf '%s' "$hit" | tr '\n' '、')"
+    else
+      printf '  ⚠ 没有匹配到服务关系（本级/上级/板块都没有）——大概率投不了，开工前先真操作验一次\n'
+    fi
+  else
+    printf '\n（想判断能不能对某个采购单位投标，加第二个参数，如：perm.sh supplier %s 沧州临港）\n' "$a"
+  fi
+}
+
 # 当前登录态在哪家公司 + 专家身份体检
 cmd_now() {
   local a="${1:-admin}"
@@ -422,6 +479,7 @@ perm.sh —— 账号 / 公司 / 岗位 / 角色 / 菜单 速查
   job       <岗位关键词>            这个岗位带哪些角色
   codeuse   <角色关键词/编码>       后端 Java 里硬编码判断这个角色的地方（改权限前必看）
   now       [别名]                  当前停在哪家公司 + 专家身份体检（能不能进专家门户）
+  supplier  [别名] [采购单位关键词]  供应商体检：入网/黑名单/冻结/服务关系，以及能不能对某采购单位投标
   cover                           ★ 招采主流程 13 棒逐条体检，直接列出"还缺什么角色"
 
   例：
@@ -450,6 +508,7 @@ case "$CMD" in
   job)       cmd_job "$@" ;;
   codeuse)   cmd_codeuse "$@" ;;
   now)       cmd_now "$@" ;;
+  supplier)  cmd_supplier "$@" ;;
   cover)     cmd_cover "$@" ;;
   help|*)    cmd_help ;;
 esac
