@@ -47,6 +47,12 @@ require_root() {
   [[ $(id -u) -eq 0 ]] || die 'must run as root'
 }
 
+supports_token_file() {
+  local binary=$1 help_output
+  help_output=$("$binary" tunnel run --help 2>&1 || true)
+  grep -- '--token-file' <<<"$help_output" >/dev/null
+}
+
 show_cloudflared_units() {
   echo '--- installed cloudflared units ---'
   systemctl list-unit-files --type=service --no-legend 2>/dev/null \
@@ -87,10 +93,11 @@ precheck() {
   command -v sshd >/dev/null 2>&1 || die 'sshd not found'
   [[ -x $SOURCE_BIN ]] || die "$SOURCE_BIN missing or not executable"
 
-  "$SOURCE_BIN" tunnel run --help 2>&1 | grep -q -- '--token-file' \
+  supports_token_file "$SOURCE_BIN" \
     || die "$SOURCE_BIN does not support --token-file"
 
-  local ssh_banner
+  local ssh_banner sshd_bin
+  sshd_bin=$(command -v sshd)
   ssh_banner=$(timeout 5 bash -c \
     'exec 3<>/dev/tcp/127.0.0.1/22; IFS= read -r x <&3; printf %s "$x"' \
     || true)
@@ -105,7 +112,7 @@ precheck() {
   fi
   "$SOURCE_BIN" --version
   printf 'ssh_loopback=%s\n' "$ssh_banner"
-  command -v sshd | xargs -r -I{} {} -T 2>/dev/null \
+  "$sshd_bin" -T 2>/dev/null \
     | awk '$1 ~ /^(port|passwordauthentication|kbdinteractiveauthentication|pubkeyauthentication|permitrootlogin)$/ {print}'
   show_cloudflared_units
   echo PRECHECK_OK
@@ -253,14 +260,14 @@ on_signal() {
 ensure_isolated_binary() {
   install -d -m 0755 "$TARGET_DIR"
   if [[ -x $TARGET_BIN ]] \
-    && "$TARGET_BIN" tunnel run --help 2>&1 | grep -q -- '--token-file'; then
+    && supports_token_file "$TARGET_BIN"; then
     echo 'isolated_binary=kept_existing_supported_copy'
   else
     install -m 0755 "$SOURCE_BIN" "$TARGET_BIN"
     echo 'isolated_binary=copied_from_/usr/local/bin/cloudflared'
   fi
   "$TARGET_BIN" --version
-  "$TARGET_BIN" tunnel run --help 2>&1 | grep -q -- '--token-file' \
+  supports_token_file "$TARGET_BIN" \
     || return 1
 }
 
@@ -338,7 +345,7 @@ start_and_verify() {
   for _ in $(seq 1 15); do
     if systemctl is-active --quiet "$UNIT" \
       && journalctl -u "$UNIT" --since "$start_time" --no-pager 2>/dev/null \
-        | grep -q 'Registered tunnel connection'; then
+        | grep 'Registered tunnel connection' >/dev/null; then
       registered=1
       break
     fi
