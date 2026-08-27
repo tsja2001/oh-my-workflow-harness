@@ -39,6 +39,7 @@
 | 推需求/走完整开发流程 | `skills/enterprise-dev-workflow/SKILL.md`（cc 会自动触发；其他工具手动读） |
 | 开发 Excel 导出、配置或修复导出模板 | `skills/enterprise-dev-workflow/references/export-template-playbook.md`（普通列表导出默认必须走平台模板） |
 | 线上异常排查：404/502、没数据、任务失败、镜像旧、配置漂移 | `skills/diagnose-scm-project/SKILL.md`（脚本型，先跑命令别先猜） |
+| **用户想跳出项目聊行业**：开开眼界/科普/这行怎么划分/一般公司都这样吗/我的经验值多少钱 | `skills/industry-perspective/SKILL.md`（cc 会自动触发；**每次聊完必须回写 `references/校准记录.md`**） |
 | 分支怎么开、提交怎么进 test、发版 test→uat→prod 找谁 | [ai-docs/团队规矩.md](ai-docs/团队规矩.md) |
 | 这个问题该问人还是自己拍板、话术怎么写、怎么跟用户讲 | [ai-docs/协作规矩.md](ai-docs/协作规矩.md) |
 | 凭据、敏感文件、哪些命令禁止 | [ai-docs/安全红线.md](ai-docs/安全红线.md) |
