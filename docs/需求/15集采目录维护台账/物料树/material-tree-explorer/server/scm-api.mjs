@@ -28,6 +28,7 @@ const TREE_CACHE_TTL_MS = 5 * 60 * 1000;
 const MAX_REQUEST_BYTES = 32 * 1024;
 const MAX_CHILD_OUTPUT_BYTES = 32 * 1024 * 1024;
 const treeCache = new Map();
+const organizationCache = new Map();
 
 class PublicError extends Error {
   constructor(message, statusCode = 400) {
@@ -196,6 +197,64 @@ async function fetchAllCategories(environment, bypassCache = false) {
   return { ...value, cached: false };
 }
 
+function normalizeOrganization(row) {
+  return {
+    orgId: row.orgId ?? '',
+    orgCode: row.orgCode ?? '',
+    orgName: row.orgName ?? '',
+    shortName: row.shortName ?? '',
+    shortFullName: row.shortFullName ?? '',
+    state: String(row.state ?? ''),
+    stateDesc: row.stateDesc ?? '',
+    organizationLevel: row.organizationLevel ?? '',
+    authLevel: row.authLevel ?? '',
+    orgType: row.orgType ?? '',
+    orgTypeDesc: row.orgTypeDesc ?? '',
+    businessType: row.businessType ?? '',
+    businessTypeDesc: row.businessTypeDesc ?? '',
+    belongBuCode: row.belongBuCode ?? '',
+    belongBuName: row.belongBuName ?? '',
+    belongPlateCode: row.belongPlateCode ?? '',
+    belongPlateName: row.belongPlateName ?? '',
+    belongCompanyOrgCode: row.belongCompanyOrgCode ?? '',
+    belongCompanyOrgName: row.belongCompanyOrgName ?? '',
+    areaPurchase: row.areaPurchase ?? null,
+    areaPurchaseDesc: row.areaPurchaseDesc ?? '',
+    isOffice: row.isOffice ?? '',
+    belongOfficeCode: row.belongOfficeCode ?? '',
+    belongOfficeName: row.belongOfficeName ?? '',
+    companyAddress: row.companyAddress ?? '',
+    updateTime: row.updateTime ?? null,
+  };
+}
+
+async function fetchAllOrganizations(environment, bypassCache = false) {
+  const cached = organizationCache.get(environment);
+  if (!bypassCache && cached && Date.now() - cached.cachedAt < TREE_CACHE_TTL_MS) {
+    return { ...cached.value, cached: true };
+  }
+
+  const { result, notice } = await callScmApi(
+    environment,
+    '/c/business/ubm/org/queryList',
+    {},
+  );
+  const rows = Array.isArray(result.data) ? result.data : [];
+  const value = {
+    environment,
+    fetchedAt: new Date().toISOString(),
+    totalCount: rows.length,
+    organizations: rows.map(normalizeOrganization),
+    source: {
+      endpoint: '/c/business/ubm/org/queryList',
+      authentication: 'scripts/api.sh',
+    },
+    notice: notice || '',
+  };
+  organizationCache.set(environment, { cachedAt: Date.now(), value });
+  return { ...value, cached: false };
+}
+
 function buildMaterialModel(input) {
   const model = {};
   const stringFields = [
@@ -283,6 +342,12 @@ export function createApiHandler() {
         const environment = environmentOf(url.searchParams.get('environment'));
         const refresh = url.searchParams.get('refresh') === '1';
         sendJson(response, 200, await fetchAllCategories(environment, refresh));
+        return;
+      }
+      if (request.method === 'GET' && url.pathname === '/api/organizations') {
+        const environment = environmentOf(url.searchParams.get('environment'));
+        const refresh = url.searchParams.get('refresh') === '1';
+        sendJson(response, 200, await fetchAllOrganizations(environment, refresh));
         return;
       }
       if (request.method === 'POST' && url.pathname === '/api/materials') {

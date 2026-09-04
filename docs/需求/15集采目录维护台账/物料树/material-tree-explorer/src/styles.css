@@ -71,6 +71,16 @@ button, input { font: inherit; }
   white-space: nowrap;
 }
 
+.module-switch {
+  max-width: 720px;
+  margin: 0 auto 14px;
+  padding: 4px;
+  border: 1px solid #cbdbea;
+  border-radius: 10px;
+  background: #f8fbfe;
+}
+.module-switch .ant-segmented-item { min-height: 34px; line-height: 34px; }
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(8, minmax(118px, 1fr));
@@ -134,9 +144,98 @@ button, input { font: inherit; }
 .difference-panel > .ant-card { margin-bottom: 12px; }
 .difference-table { margin-top: 12px; }
 
+.organization-explorer { display: grid; gap: 14px; }
+.organization-source, .selected-heading, .coverage-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.organization-source {
+  padding: 9px 13px;
+  border: 1px solid #cbdbea;
+  border-radius: 9px;
+  background: #f8fbfe;
+  color: #486581;
+  font-size: 13px;
+}
+.organization-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(118px, 1fr));
+  gap: 10px;
+}
+.organization-stats-grid .ant-card-body { padding: 14px 15px; }
+.organization-stats-grid .ant-statistic-title { font-size: 12px; }
+.organization-stats-grid .ant-statistic-content { font-size: 23px; }
+.organization-tabs-card { overflow: hidden; box-shadow: 0 5px 18px rgb(36 59 83 / 8%); }
+.organization-tabs-card > .ant-card-body { padding-top: 8px; }
+.organization-view-grid {
+  display: grid;
+  grid-template-columns: minmax(410px, 34%) minmax(700px, 66%);
+  gap: 14px;
+  align-items: start;
+}
+.organization-view-grid > * { min-width: 0; }
+.organization-tree-card, .organization-detail-card { min-height: 760px; }
+.organization-tree-card > .ant-card-body { padding: 12px; }
+.organization-filters {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.organization-filters.region-filters { grid-template-columns: 1.5fr 1fr; align-items: center; }
+.region-explain { margin-bottom: 10px; }
+.organization-tree-card .ant-tree { padding: 3px; background: transparent; }
+.organization-tree-card .ant-tree-node-content-wrapper { min-height: 28px; line-height: 28px; }
+.organization-tree-card .ant-tag { font-size: 10px; line-height: 17px; }
+.organization-detail .ant-typography, .selected-heading .ant-typography { margin: 0; }
+.selected-heading { align-items: flex-start; margin-bottom: 16px; }
+.section-title { margin: 18px 0 9px !important; }
+.section-table { margin-top: 16px; }
+.coverage-view, .quality-view { display: grid; gap: 14px; }
+.bu-coverage-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(220px, 1fr));
+  gap: 10px;
+}
+.bu-coverage-grid .ant-card-body { padding: 12px 14px; }
+.coverage-card-title { justify-content: flex-start; margin-bottom: 4px; }
+.coverage-card-title span {
+  overflow: hidden;
+  color: #627d98;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.coverage-matrix .ant-table-cell { padding: 6px !important; }
+.matrix-cell {
+  width: 100%;
+  min-width: 38px;
+  padding: 5px 4px;
+  border: 0;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 700;
+}
+.matrix-cell:hover { outline: 2px solid #0958d9; outline-offset: 1px; }
+.matrix-zero { color: #b8c4ce; }
+.quality-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 10px;
+}
+.quality-card-grid .ant-card-body { padding: 13px 15px; }
+.quality-card-grid .ant-statistic-content { font-size: 24px; }
+.quality-warning { border-color: #ffd591; background: #fffaf0; }
+.quality-danger { border-color: #ffccc7; background: #fff7f6; }
+
 .footer-note { padding: 14px 4px 2px; color: #829ab1; text-align: center; font-size: 12px; }
 
 @media (max-width: 1380px) {
   .stats-grid { grid-template-columns: repeat(4, 1fr); }
+  .organization-stats-grid { grid-template-columns: repeat(4, 1fr); }
   .main-grid { grid-template-columns: 410px minmax(720px, 1fr); }
+  .organization-view-grid { grid-template-columns: 410px minmax(700px, 1fr); }
+  .bu-coverage-grid { grid-template-columns: repeat(3, minmax(220px, 1fr)); }
 }

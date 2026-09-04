@@ -3,6 +3,7 @@ import type {
   Environment,
   MaterialFilters,
   MaterialResponse,
+  OrganizationResponse,
 } from './types';
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
@@ -24,6 +25,12 @@ export function fetchCategories(environment: Environment, refresh = false) {
   const search = new URLSearchParams({ environment });
   if (refresh) search.set('refresh', '1');
   return requestJson<CategoryResponse>(`/api/categories?${search}`);
+}
+
+export function fetchOrganizations(environment: Environment, refresh = false) {
+  const search = new URLSearchParams({ environment });
+  if (refresh) search.set('refresh', '1');
+  return requestJson<OrganizationResponse>(`/api/organizations?${search}`);
 }
 
 export function fetchAuthStatus(environment: Environment) {

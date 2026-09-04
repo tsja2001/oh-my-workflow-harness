@@ -200,7 +200,9 @@ PlanProductRange productRange = planProductRangeMapper.selectOne(query);   // �
 
 **改法**：删掉那段死代码，在 `listCover` 之后统一补 `createTimeStr`。顺手的事。
 
-### 4.4 🟡 台账里的「集采执行单位」这一列，代码里**根本没人读**
+### 4.4 ~~🟡 台账里的「集采执行单位」这一列，代码里**根本没人读**~~
+
+> 【失效 2026-09-04：本节结论是错的。这一列**有人读**——`getCollectionSupplierCode`（`PlanServiceImpl.java:2029` / `PlanTaskServiceImpl.java:682`）在计划转采购时把它写进 `sc_scheme_to_purchase.collection_supplier_code`，「集采采购计划（集采单位端）」再按当前登录公司的 MDM 码过滤它（`SchemeToPurchaseController.java:427/435`）。**产品说的「控制集采执行单位在线确认计划」是对的。** 正确版本见 `10g-集采目录层级与影响范围-cc.md` §6.1。下面这段保留只为留痕，别用。】
 
 产品在会上说（20:36）："目前此字段控制集采执行单位在线确认计划"。但：
 
@@ -209,7 +211,9 @@ PlanProductRange productRange = planProductRangeMapper.selectOne(query);   // �
   当前用户所在公司如果在这个字典里，就直接返回"不是集采"；
 - 这个字典 uat 里只有 **2 家**：`10010072 北分`、`12300000 机电公司`。
 
-**所以产品那句话与代码对不上**。要么是他记错了，要么是"在线确认计划"在别的系统/别的模块。**这条要当面对一下**，因为需求 §5 说"二级集团/区域层级无需配置集采执行单位"——如果这一列本来就没用，那条规则也就没有实际约束力。
+~~**所以产品那句话与代码对不上**。要么是他记错了，要么是"在线确认计划"在别的系统/别的模块。**这条要当面对一下**，因为需求 §5 说"二级集团/区域层级无需配置集采执行单位"——如果这一列本来就没用，那条规则也就没有实际约束力。~~
+
+> 【失效 2026-09-04：漏搜了 `getCollectionSupplierCode`（它是 private 方法，搜 `supplier_code` 字面量搜不到）。产品是对的，这条不用再问。新值见 `10g` §6.1。】
 
 ---
 

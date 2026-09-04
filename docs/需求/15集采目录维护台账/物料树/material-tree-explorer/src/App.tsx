@@ -3,6 +3,8 @@ import {
   ApartmentOutlined,
   BranchesOutlined,
   DatabaseOutlined,
+  EnvironmentOutlined,
+  NodeIndexOutlined,
   ReloadOutlined,
   SafetyCertificateOutlined,
   WarningOutlined,
@@ -23,6 +25,7 @@ import {
 import { fetchAuthStatus, fetchCategories, login } from './api';
 import CategoryDetail from './components/CategoryDetail';
 import CategoryTreePanel from './components/CategoryTreePanel';
+import OrganizationExplorer from './components/OrganizationExplorer';
 import type { CategoryForest, Environment } from './types';
 import { buildCategoryForest } from './utils/tree';
 
@@ -39,6 +42,9 @@ export default function MaterialTreeApp() {
   const [cached, setCached] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const [activeModule, setActiveModule] = useState<'material' | 'organization'>('material');
+  const [organizationRefreshToken, setOrganizationRefreshToken] = useState(0);
+  const [organizationLoading, setOrganizationLoading] = useState(false);
   const requestId = useRef(0);
   const otherEnvironment: Environment = environment === 'test' ? 'uat' : 'test';
 
@@ -97,14 +103,26 @@ export default function MaterialTreeApp() {
     }
   };
 
+  const refreshCurrentModule = () => {
+    if (activeModule === 'material') {
+      void loadData(environment, true);
+      return;
+    }
+    setOrganizationRefreshToken((current) => current + 1);
+  };
+
+  const handleOrganizationLoading = useCallback((nextLoading: boolean) => {
+    setOrganizationLoading(nextLoading);
+  }, []);
+
   return (
     <div className="app-shell">
       <header className="topbar">
         <div className="brand">
           <div className="brand-mark"><ApartmentOutlined /></div>
           <div>
-            <h1>物料全景树</h1>
-            <p>完整类目层级 · 具体物料 · test/UAT 差异</p>
+            <h1>招采主数据全景</h1>
+            <p>物料类目 · 组织层级 · 区域覆盖 · test/UAT</p>
           </div>
         </div>
         <div className="topbar-actions">
@@ -124,8 +142,8 @@ export default function MaterialTreeApp() {
           </Button>
           <Button
             type="primary"
-            icon={<ReloadOutlined spin={loading} />}
-            onClick={() => void loadData(environment, true)}
+            icon={<ReloadOutlined spin={activeModule === 'material' ? loading : organizationLoading} />}
+            onClick={refreshCurrentModule}
           >
             刷新数据
           </Button>
@@ -142,7 +160,19 @@ export default function MaterialTreeApp() {
           <div className="auth-summary">{authStatus}</div>
         </div>
 
-        {error && (
+        <div className="module-switch">
+          <Segmented<'material' | 'organization'>
+            block
+            value={activeModule}
+            options={[
+              { value: 'material', label: <Space><NodeIndexOutlined />物料类目与具体物料</Space> },
+              { value: 'organization', label: <Space><EnvironmentOutlined />集团、BU、企业与区域</Space> },
+            ]}
+            onChange={setActiveModule}
+          />
+        </div>
+
+        {activeModule === 'material' && error && (
           <Alert
             type="error"
             showIcon
@@ -152,7 +182,7 @@ export default function MaterialTreeApp() {
           />
         )}
 
-        <section className="stats-grid">
+        {activeModule === 'material' && <section className="stats-grid">
           <Card><Statistic title="类目总数" value={forest.stats.total} prefix={<DatabaseOutlined />} /></Card>
           <Card><Statistic title="末级类目" value={forest.stats.leaf} prefix={<BranchesOutlined />} /></Card>
           {[1, 2, 3, 4].map((level) => (
@@ -164,9 +194,15 @@ export default function MaterialTreeApp() {
             <Statistic title="断链节点" value={forest.stats.orphan} prefix={<WarningOutlined />} />
           </Card>
           <Card><Statistic title="停用节点" value={forest.stats.disabled} /></Card>
-        </section>
+        </section>}
 
-        {loading && forest.stats.total === 0 ? (
+        {activeModule === 'organization' ? (
+          <OrganizationExplorer
+            environment={environment}
+            refreshToken={organizationRefreshToken}
+            onLoadingChange={handleOrganizationLoading}
+          />
+        ) : loading && forest.stats.total === 0 ? (
           <Card><Skeleton active paragraph={{ rows: 12 }} /></Card>
         ) : forest.stats.total === 0 && !error ? (
           <Card><Empty description="当前环境没有类目数据" /></Card>

@@ -106,3 +106,102 @@ export interface CategoryDifference {
   nameChanges: Array<{ current: CategoryNode; other: CategoryNode }>;
   stateChanges: Array<{ current: CategoryNode; other: CategoryNode }>;
 }
+
+export interface OrganizationRecord {
+  orgId: string;
+  orgCode: string;
+  orgName: string;
+  shortName: string;
+  shortFullName: string;
+  state: string;
+  stateDesc: string;
+  organizationLevel: string;
+  authLevel: string;
+  orgType: string;
+  orgTypeDesc: string;
+  businessType: string;
+  businessTypeDesc: string;
+  belongBuCode: string;
+  belongBuName: string;
+  belongPlateCode: string;
+  belongPlateName: string;
+  belongCompanyOrgCode: string;
+  belongCompanyOrgName: string;
+  areaPurchase: number | null;
+  areaPurchaseDesc: string;
+  isOffice: string;
+  belongOfficeCode: string;
+  belongOfficeName: string;
+  companyAddress: string;
+  updateTime: string | null;
+}
+
+export interface OrganizationResponse {
+  environment: Environment;
+  fetchedAt: string;
+  totalCount: number;
+  organizations: OrganizationRecord[];
+  cached: boolean;
+  notice: string;
+  source: {
+    endpoint: string;
+    authentication: string;
+  };
+}
+
+export interface BuSummary {
+  code: string;
+  name: string;
+  names: string[];
+  anchorOrganizations: OrganizationRecord[];
+  enterprises: OrganizationRecord[];
+  assignedEnterprises: OrganizationRecord[];
+  coverageRate: number;
+}
+
+export interface RegionSummary {
+  code: string;
+  name: string;
+  names: string[];
+  enterprises: OrganizationRecord[];
+  buCodes: string[];
+  codeNameConflict: boolean;
+  enterpriseCodeMatches: OrganizationRecord[];
+}
+
+export interface NameCodeConflict {
+  name: string;
+  codes: string[];
+  enterprises: OrganizationRecord[];
+}
+
+export interface OrganizationAnalysis {
+  groupName: string;
+  groupRoots: OrganizationRecord[];
+  enterprises: OrganizationRecord[];
+  buGroups: BuSummary[];
+  regionGroups: RegionSummary[];
+  unassignedEnterprises: OrganizationRecord[];
+  unclassifiedOrganizations: OrganizationRecord[];
+  quality: {
+    missingRegionCode: OrganizationRecord[];
+    missingRegionName: OrganizationRecord[];
+    missingBu: OrganizationRecord[];
+    codeNameConflicts: RegionSummary[];
+    nameCodeConflicts: NameCodeConflict[];
+    enterpriseCodeRegions: OrganizationRecord[];
+    disabledWithRegion: OrganizationRecord[];
+  };
+  stats: {
+    total: number;
+    enterprises: number;
+    groupLevel: number;
+    platformLevel: number;
+    unclassified: number;
+    buCount: number;
+    regionCount: number;
+    assignedRegion: number;
+    completeRegion: number;
+    missingRegion: number;
+  };
+}
