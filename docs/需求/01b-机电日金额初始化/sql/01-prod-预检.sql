@@ -6,6 +6,16 @@
 
 USE `scm_source_prod`;
 
+-- ⓪ 库定位（只读 information_schema，任何连接实例跑都行）
+--    作用：一次看清三张表/字典真实挂在哪个库，彻底消除"库名靠文档猜"的问题
+--    期望：ubm_dict 和 ubm_organization 在同一个字典库（文档记载是 scm_ubm，以本查询结果为准）；
+--         sc_collection_daily_amount_ledger 在 scm_source_prod（你的台账部署文档同款）
+--    ⚠️ 若返回的 schema 名与 01~04 脚本里写的不一致：停下回传 cc，改好再执行
+SELECT TABLE_SCHEMA, TABLE_NAME
+FROM information_schema.TABLES
+WHERE TABLE_NAME IN ('ubm_dict','ubm_organization','sc_collection_daily_amount_ledger')
+ORDER BY TABLE_NAME, TABLE_SCHEMA;
+
 -- ① 流水号撞号检查：8 个统计日中段在全表 ledger_no 的占用数
 --    期望：8 行全部 = 0
 SELECT '2026-02-01' AS 统计日, COUNT(*) AS 已占用数 FROM `sc_collection_daily_amount_ledger` WHERE `ledger_no` LIKE 'JCRJE-20260201-%'
