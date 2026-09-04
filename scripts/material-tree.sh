@@ -5,7 +5,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-APP_DIR="$ROOT_DIR/tools/material-tree-explorer"
+APP_DIR="$ROOT_DIR/docs/需求/15集采目录维护台账/物料树/material-tree-explorer"
 command_name="${1:-dev}"
 
 usage() {

@@ -92,7 +92,7 @@
 
 ### 2. 项目落点
 
-- 新项目：`tools/material-tree-explorer/`
+- 新项目：`docs/需求/15集采目录维护台账/物料树/material-tree-explorer/`
 - 技术栈：React + TypeScript + Vite + Ant Design。
 - 本地 BFF：Node.js 原生 HTTP；开发时作为 Vite 中间件，构建后同时托管静态文件与 `/api/*`。
 - 工作区脚本调用：使用 `child_process.spawn` 参数数组调用，禁止拼 shell 字符串。

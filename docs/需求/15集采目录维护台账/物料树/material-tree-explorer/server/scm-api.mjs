@@ -1,9 +1,28 @@
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const WORKSPACE_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
-const API_SCRIPT = `${WORKSPACE_ROOT}scripts/api.sh`;
-const AUTH_SCRIPT = `${WORKSPACE_ROOT}scripts/auth.sh`;
+function findWorkspaceRoot() {
+  let currentDirectory = dirname(fileURLToPath(import.meta.url));
+  while (true) {
+    if (
+      existsSync(resolve(currentDirectory, 'scripts/api.sh')) &&
+      existsSync(resolve(currentDirectory, 'scripts/auth.sh'))
+    ) {
+      return currentDirectory;
+    }
+    const parentDirectory = dirname(currentDirectory);
+    if (parentDirectory === currentDirectory) {
+      throw new Error('找不到工作区 scripts/api.sh 和 scripts/auth.sh');
+    }
+    currentDirectory = parentDirectory;
+  }
+}
+
+const WORKSPACE_ROOT = findWorkspaceRoot();
+const API_SCRIPT = resolve(WORKSPACE_ROOT, 'scripts/api.sh');
+const AUTH_SCRIPT = resolve(WORKSPACE_ROOT, 'scripts/auth.sh');
 const ALLOWED_ENVIRONMENTS = new Set(['test', 'uat']);
 const TREE_CACHE_TTL_MS = 5 * 60 * 1000;
 const MAX_REQUEST_BYTES = 32 * 1024;
