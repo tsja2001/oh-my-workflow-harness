@@ -21,6 +21,9 @@ WHERE `ledger_id` LIKE 'INITJD%' AND `create_by_name`='董杰' AND `delete_sign`
 -- DELETE FROM `sc_collection_daily_amount_ledger`
 -- WHERE `ledger_id` LIKE 'INITJD%' AND `create_by_name`='董杰';
 
+-- 恢复（撤销回滚）：UPDATE ... SET delete_sign=0 WHERE ledger_id LIKE 'INITJD%' AND create_by_name='董杰' AND delete_sign=1
+-- prod 另有整表快照 _bak_20260904 作最后保险（见 02 Section 0）
+
 -- 回滚的行明细（留档用）
 SELECT `ledger_no`,`statistic_date`,`category_name`,`purchase_company_name`,`tax_amount`
 FROM `sc_collection_daily_amount_ledger`

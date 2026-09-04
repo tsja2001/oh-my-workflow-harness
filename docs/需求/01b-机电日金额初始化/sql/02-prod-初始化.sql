@@ -8,12 +8,25 @@
 --   板块短名按本环境 Owningplate 字典落（与页面录入一致）
 --   采购企业名称按本环境组织名落
 --   重跑只更新金额/发布信息，创建审计字段保持首跑
--- ⚠️ 内置名称默认值=uat 库实查值（10010000=金隅冀东水泥集团股份有限公司、BU004=冀东发展等），
---    prod 实际名称以 01 预检第②③节返回为准：若与内置不一致，停下回传 cc 重新生成，禁止手工改 SQL
--- 前置：01 预检 ①②③⑤⑥ 全部符合期望（④ 若发现脏码回传 cc 出修正脚本）
+-- ⚠️ prod 专项：内置名称默认值=uat 库实查值（10010000=金隅冀东水泥集团股份有限公司、BU004=冀东发展等），
+--    prod 实际名称以 01 预检第②③节返回为准：不一致则停下回传 cc 重新生成，禁止手工改 SQL
+-- 前置：01 预检全部节符合期望（④ 若发现脏码回传 cc 出修正脚本；⑥ 开关若=0 见手册风险1）
 -- ============================================================
 
 USE `scm_source_prod`;
+
+-- ---------------------------------------------------------------------
+-- Section 0：灌库前备份（幂等）——套路同 19 指标改名部署；排除 INITJD 行，重跑不混入
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `sc_collection_daily_amount_ledger_bak_20260904`
+  LIKE `sc_collection_daily_amount_ledger`;
+
+INSERT IGNORE INTO `sc_collection_daily_amount_ledger_bak_20260904`
+SELECT * FROM `sc_collection_daily_amount_ledger`
+WHERE `ledger_id` NOT LIKE 'INITJD%';
+
+SELECT (SELECT COUNT(*) FROM `sc_collection_daily_amount_ledger`)              AS 主表行数,
+       (SELECT COUNT(*) FROM `sc_collection_daily_amount_ledger_bak_20260904`) AS 备份行数_灌库前状态;
 
 START TRANSACTION;
 
