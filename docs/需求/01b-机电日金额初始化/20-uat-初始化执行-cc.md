@@ -1,0 +1,95 @@
+# 01b 机电日金额初始化 · UAT 执行手册（灌库 + 同步 + 对账）
+
+> 日期：2026-09-04 ｜ 工具：cc ｜ 状态：**SQL 已生成待执行**（映射值已按 uat 库实查核实） ｜ 下一步：跑预检（含字典决定）→ 灌库 → 同步 → 对账
+>
+> 姊妹文档：`20-test-初始化执行-cc.md`（test 已灌库核验通过，待同步）。生成脚本同源：`/tmp/opencode/gen_init_sql.py uat`。
+> 数据源：`机电公司导入模板2026.9.4全.xlsx`（81 行 / 128,740,939.09 元）。
+
+## 0. uat 与 test 的差异（都已连库核实，不是猜的）
+
+| 项 | test | uat |
+|---|---|---|
+| 10010000 组织名 | 冀东水泥股份有限公司（旧名） | **金隅冀东水泥集团股份有限公司** |
+| BU004 板块短名 | 冀东发展集团 | **冀东发展** |
+| 灌库前机电基线 | 15 行 / 433,923.93 | **2 行 / 18,019.68**（张雨 06-30 19 元、郭小华 07-27 18,000.68 元） |
+| ES JD 基线（实测 09-04） | 15 | **2** |
+| 类目字典「电线电缆」 | 2302 干净 | **脏值 " 2302"（前导空格，HEX 2032333032）** |
+| 板块字典 BU005 | 干净 | **尾部带 0x09 TAB** |
+
+⚠️ **字典脏值的实际影响**：uat 页面录入的「电线电缆」行 category_code 会存成 " 2302"，驾驶舱按类目匹配可能认不出——这是 uat 环境自身问题，不是本次初始化引入的。我们的 SQL 一律写**标准干净码 2302**（与 test、与驾驶舱口径一致）。
+
+## 1. 交付物（`sql/`，uat 五件）
+
+| 文件 | 用途 |
+|---|---|
+| `01-uat-预检.sql` | 五节检查（流水号撞号/组织/板块字典/类目字典/基线），只读 |
+| `02-uat-初始化.sql` | 81 行幂等灌库 |
+| `03-uat-回滚.sql` | 逻辑删（INITJD 前缀 + 创建人董杰 双保险） |
+| `04-uat-对账.sql` | 同步后 MySQL 四个口径 |
+| `05-uat-字典脏数据修正.sql` | **可选**，修上面两个字典脏值，执行前需你点头 |
+
+## 2. 执行步骤
+
+**① 预检**
+```bash
+bash scripts/dbq.sh "$(cat docs/需求/01b-机电日金额初始化/sql/01-uat-预检.sql)" scm_source_uat
+```
+期望：① 八行全 0；② 六组织 BU 正确（10010000 名称为金隅冀东水泥集团股份有限公司）；③ 六板块短名（BU005 会带 TAB，属已知）；④ **uat 实际只得 3 行（缺 2302），已知，先做 ⑤ 基线**（2 行 / 18,019.68）。
+
+**②（建议）修字典**：跑 `05-uat-字典脏数据修正.sql`（自带修正前后留证与核验），修完 01 的第④节应得 4 行。
+不修也不影响灌库（02 写的是干净码），只是 uat 页面新录的电线电缆行仍有带空格码的隐患——建议修。
+
+**③ 灌库**
+```bash
+bash scripts/dbq.sh "$(cat docs/需求/01b-机电日金额初始化/sql/02-uat-初始化.sql)" scm_source_uat
+```
+末尾自检期望：`81 ｜ 128740939.09`。
+
+**④ 触发同步（二选一）**
+```bash
+# A. 接口直调（uat 凭据）
+bash scripts/api.sh --env uat POST /e/business/source/centralizedProcurementReport/syncJd \
+  '{"startTime":"2026-01-01 00:00:00","endTime":"2026-09-01 23:59:59"}'
+```
+B. 调度中心网页：任务「集采业务统计报表-机电四大类」执行一次，参数
+`source-centralizedProcurementReportService-syncJdData-{"startTime":"2026-01-01 00:00:00","endTime":"2026-09-01 23:59:59"}`
+
+**⑤ 对账（三处一致才算通）**
+```bash
+# MySQL
+bash scripts/dbq.sh "$(cat docs/需求/01b-机电日金额初始化/sql/04-uat-对账.sql)" scm_source_uat
+# ES（uat 索引；金额字段 taxTotal）
+bash scripts/esq.sh count index_centralized_procurement_report_uat '{"query":{"bool":{"filter":[{"term":{"dataSource":"JD"}}]}}}'
+bash scripts/esq.sh search index_centralized_procurement_report_uat '{"size":0,"query":{"bool":{"filter":[{"term":{"dataSource":"JD"}}]}},"aggs":{"amt":{"sum":{"field":"taxTotal"}}}}'
+# 驾驶舱
+bash scripts/api.sh --env uat GET /e/business/source/source/cockpit_collection_data_categoryAmount
+```
+
+期望数字：
+
+| 口径 | 期望 |
+|---|---|
+| 初始化行（MySQL ①） | 81 行 / 128,740,939.09 |
+| 全部机电行（MySQL ②） | 83 行 / 128,758,958.77 |
+| ES JD（同步前实测 2） | count = 83，sum ≈ 128,758,958.77 |
+| 钢材增量 | 22 行 / 82,811,628.57 |
+| 电线电缆增量 | 21 行 / 20,112,227.72 |
+| 润滑剂增量 | 21 行 / 14,860,017.45 |
+| 轴承及备件增量 | 17 行 / 10,957,065.35 |
+
+驾驶舱四格 = 灌库前数字 + 上表增量（灌库前数字在 ① 预检后、灌库前先抄一份 cockpit 返回留底最稳）。
+
+**⑥ 回滚（出问题时）**
+```bash
+bash scripts/dbq.sh "$(cat docs/需求/01b-机电日金额初始化/sql/03-uat-回滚.sql)" scm_source_uat
+```
+回滚后必须重新执行一次 ④ 同步。
+
+## 3. 执行记录（执行后回填）
+
+- [ ] 预检（＿＿＿）
+- [ ] 字典修正 05：执行 / 豁免（＿＿＿）
+- [ ] 灌库自检 81 / 128,740,939.09（＿＿＿）
+- [ ] 同步触发方式：A 接口 / B 调度中心（＿＿＿）
+- [ ] ES count=83 sum≈128,758,958.77（＿＿＿）
+- [ ] 驾驶舱四格增量对上（＿＿＿）
