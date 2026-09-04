@@ -1,0 +1,142 @@
+:root {
+  color: #243b53;
+  background: #edf3f8;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-width: 1180px;
+  min-height: 100vh;
+}
+
+button, input { font: inherit; }
+
+.app-shell { min-height: 100vh; }
+
+.topbar {
+  position: sticky;
+  z-index: 20;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 76px;
+  padding: 12px 28px;
+  color: #fff;
+  background: linear-gradient(110deg, #102a43 0%, #0b548f 62%, #1479b8 100%);
+  box-shadow: 0 3px 14px rgb(16 42 67 / 22%);
+}
+
+.brand, .topbar-actions, .category-heading, .context-strip, .table-summary, .subsection-title {
+  display: flex;
+  align-items: center;
+}
+
+.brand { gap: 13px; }
+.brand-mark {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 28%);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 12%);
+  font-size: 23px;
+}
+.brand h1 { margin: 0; color: #fff; font-size: 23px; letter-spacing: 1px; }
+.brand p { margin: 2px 0 0; color: #cfe8ff; font-size: 12px; }
+.topbar-actions { gap: 10px; }
+.topbar-actions .ant-badge-status-text { color: #fff; }
+
+.workspace { padding: 18px 24px 12px; }
+.context-strip {
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border: 1px solid #cbdbea;
+  border-radius: 9px;
+  background: #f8fbfe;
+  color: #486581;
+  font-size: 13px;
+}
+.auth-summary {
+  overflow: hidden;
+  max-width: 52%;
+  color: #627d98;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(118px, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+.stats-grid .ant-card-body { padding: 14px 15px; }
+.stats-grid .ant-statistic-title { font-size: 12px; }
+.stats-grid .ant-statistic-content { font-size: 24px; }
+.warning-card { border-color: #ffbb96; background: #fff8f2; }
+
+.main-grid {
+  display: grid;
+  grid-template-columns: minmax(390px, 31%) minmax(720px, 69%);
+  gap: 14px;
+  align-items: start;
+}
+.main-grid > * { min-width: 0; }
+.tree-card, .detail-card { min-height: 820px; box-shadow: 0 5px 18px rgb(36 59 83 / 8%); }
+.detail-card { overflow: hidden; }
+.tree-card .ant-card-body { padding: 12px; }
+.detail-card .ant-card-body { padding-top: 8px; }
+.tree-filters { display: grid; gap: 10px; margin-bottom: 10px; }
+.filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: center; }
+.filter-row.between { display: flex; justify-content: space-between; }
+.tree-card .ant-tree { padding: 4px; background: transparent; }
+.tree-card .ant-tree-node-content-wrapper { min-height: 28px; line-height: 28px; }
+.tree-card .ant-tag { margin-left: 8px; font-size: 10px; line-height: 17px; }
+.tree-card mark { border-radius: 2px; background: #ffe58f; color: inherit; }
+.muted-node { color: #97a6b2; text-decoration: line-through; }
+.tree-empty { display: grid; height: 480px; place-items: center; color: #829ab1; }
+
+.category-heading { justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+.category-heading .ant-typography { margin: 0; }
+.category-heading > div:first-child { min-width: 0; }
+.detail-overview .ant-descriptions { margin-bottom: 20px; }
+.subsection-title { justify-content: space-between; margin: 18px 0 8px; }
+.subsection-title .ant-typography { margin: 0; }
+
+.material-explorer { display: grid; gap: 14px; }
+.material-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 0 12px;
+}
+.material-form-grid .ant-form-item { margin-bottom: 12px; }
+.table-summary { justify-content: space-between; }
+.small-text { font-size: 11px; }
+.material-pagination { justify-self: end; }
+.section-alert { margin-top: 4px; }
+
+.difference-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.difference-stats .ant-card-body { display: flex; align-items: baseline; gap: 9px; }
+.difference-stats strong { color: #0b6bcb; font-size: 25px; }
+.difference-stats span { color: #627d98; }
+.difference-panel > .ant-card { margin-bottom: 12px; }
+.difference-table { margin-top: 12px; }
+
+.footer-note { padding: 14px 4px 2px; color: #829ab1; text-align: center; font-size: 12px; }
+
+@media (max-width: 1380px) {
+  .stats-grid { grid-template-columns: repeat(4, 1fr); }
+  .main-grid { grid-template-columns: 410px minmax(720px, 1fr); }
+}
