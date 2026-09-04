@@ -44,6 +44,7 @@
 | 这个问题该问人还是自己拍板、话术怎么写、怎么跟用户讲 | [ai-docs/协作规矩.md](ai-docs/协作规矩.md) |
 | 凭据、敏感文件、哪些命令禁止 | [ai-docs/安全红线.md](ai-docs/安全红线.md) |
 | 这个接口/页面属于哪个服务、环境地址、中间件在哪 | [ai-docs/系统地图.md](ai-docs/系统地图.md) |
+| **审批流/工作流**：某业务流程怎么配、单子卡在谁手里、加流程变量、新单据接审批 | [ai-docs/工作流地图.md](ai-docs/工作流地图.md)（速查表起步）＋ `bash scripts/wf.sh --help`（只读） |
 | 代码怎么分仓分层、AIM 是什么、Jenkins 和 mvn deploy 的区别 | [ai-docs/代码库地图.md](ai-docs/代码库地图.md) |
 | **`01zhaocai-end/`（后端）`02zhaocai-front/`（前端）`03zhaocai-start/`（启动工程）分别是什么** | 同上。**三者的子目录才是独立 git 仓，顶层不是**——在顶层跑 `git show origin/test` 会落到文档仓并报「无此引用」 |
 | 本地跑起来、隔离编译、IDEA/JDK 配置 | [ai-docs/本地运行手册.md](ai-docs/本地运行手册.md) |
