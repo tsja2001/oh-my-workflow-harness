@@ -1,0 +1,7 @@
+{
+	"window.title": "🤣 work-wsl${separator}${dirty}${activeEditorShort}",
+	"workbench.colorCustomizations": {
+		"titleBar.activeBackground": "#9e572e",
+		"titleBar.activeForeground": "#e7e7e7"
+	}
+}
