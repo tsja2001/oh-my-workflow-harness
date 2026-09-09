@@ -15,6 +15,7 @@ scripts/.cache/
 ai-docs/.auth-cache/
 .playwright-cli/
 .workbuddy/
+.tmp-mermaid/
 *.class
 
 # 系统与编辑器杂物
@@ -25,3 +26,6 @@ Thumbs.db
 
 # 机场订阅备份（含服务器地址与凭据，不入库）
 docs/工作文档日常记录/clash备份.yaml
+
+# 库表备份（含业务数据，不入库）
+ai-docs/db-backup/

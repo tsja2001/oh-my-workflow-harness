@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /home/t/projects/work-wsl && ls -1 && echo \"--- ai-docs ---\" && ls -1 ai-docs/ && echo \"--- docs/需求 ---\" && ls -1 docs/需求/ && echo \"--- 15 ---\" && ls -la \"docs/需求/15集采目录维护台账/\" 2>/dev/null | head -60)",
+      "Bash(cd /home/t/projects/work-wsl && echo \"=== mermaid 用法统计 ===\" && grep -rl '```mermaid' docs/ ai-docs/ 2>/dev/null | head -20 && echo \"count: $\\(grep -rl '\\\\`\\\\`\\\\`mermaid' docs/ ai-docs/ 2>/dev/null | wc -l\\)\" && echo \"=== ASCII 流程图嫌疑（框线字符）===\" && grep -rl $'┌\\\\|│\\\\|─\\\\|▼\\\\|►' docs/ ai-docs/ 2>/dev/null | head -30)",
+      "Bash(cd \"/home/t/projects/work-wsl/docs/需求/15集采目录维护台账\" && echo \"=== 箭头/流程符号出现次数 by file ===\" && for f in *.md; do n=$\\(grep -c -E '→|->|==>|▼|↑|↓|\\\\|--' \"$f\" 2>/dev/null\\); echo \"$n  $f\"; done | sort -rn | head -20)",
+      "Bash(cd \"/home/t/projects/work-wsl/docs/需求/15集采目录维护台账\" && echo \"=== 51-集采管控全流程走一遍 前120行 ===\" && head -120 \"51-集采管控全流程走一遍-cc.md\")"
+    ]
+  }
+}
